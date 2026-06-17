@@ -1,0 +1,1 @@
+UPDATE public.contact_info SET latitude = 24.7136, longitude = 46.6753 WHERE latitude = 30.0444 AND longitude = 31.2357;

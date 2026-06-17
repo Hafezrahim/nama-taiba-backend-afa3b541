@@ -1,0 +1,11 @@
+project_id = "zqpptzorxufrfdgwgxxr"
+
+[functions.scheduled-backup]
+verify_jwt = false
+
+[functions.generate-product-image]
+verify_jwt = true
+
+[functions.security-webhook]
+verify_jwt = false
+

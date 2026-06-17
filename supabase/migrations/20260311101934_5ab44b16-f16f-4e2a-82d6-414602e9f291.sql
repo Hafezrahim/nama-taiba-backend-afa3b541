@@ -1,0 +1,1 @@
+ALTER TABLE public.products ADD COLUMN moq integer NOT NULL DEFAULT 1;
