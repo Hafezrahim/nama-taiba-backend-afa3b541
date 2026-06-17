@@ -51,6 +51,7 @@ const ProductInfo = ({
       </div>
       
       <ProductActions
+        productName={language === 'en' ? product.nameEn : product.nameAr}
         onAddToCart={onAddToCart}
         onAddToWishlist={onAddToWishlist}
         onShare={onShare}
