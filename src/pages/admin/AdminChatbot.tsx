@@ -14,6 +14,32 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import * as XLSX from 'xlsx';
 
+const getCategoryColor = (category: string) => {
+  const colors = [
+    'bg-blue-500 hover:bg-blue-600 text-white',
+    'bg-purple-500 hover:bg-purple-600 text-white',
+    'bg-amber-500 hover:bg-amber-600 text-white',
+    'bg-emerald-500 hover:bg-emerald-600 text-white',
+    'bg-rose-500 hover:bg-rose-600 text-white',
+    'bg-cyan-500 hover:bg-cyan-600 text-white',
+    'bg-indigo-500 hover:bg-indigo-600 text-white',
+  ];
+  
+  const normalized = category?.toLowerCase().trim();
+  if (normalized === 'products') return 'bg-blue-500 hover:bg-blue-600 text-white';
+  if (normalized === 'orders') return 'bg-purple-500 hover:bg-purple-600 text-white';
+  if (normalized === 'shipping') return 'bg-amber-500 hover:bg-amber-600 text-white';
+  if (normalized === 'payment') return 'bg-emerald-500 hover:bg-emerald-600 text-white';
+  if (normalized === 'returns') return 'bg-rose-500 hover:bg-rose-600 text-white';
+
+  if (!category) return colors[0];
+  let hash = 0;
+  for (let i = 0; i < category.length; i++) {
+    hash = category.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+};
+
 export default function AdminChatbot() {
   const { t } = useLanguage();
   const queryClient = useQueryClient();
@@ -303,7 +329,7 @@ export default function AdminChatbot() {
                     <TableCell className="text-muted-foreground text-xs">{(currentPage - 1) * rowsPerPage + idx + 1}</TableCell>
                     <TableCell className="max-w-[200px] truncate text-sm">{faq.question_en}</TableCell>
                     <TableCell className="max-w-[200px] truncate text-sm">{faq.question_ar}</TableCell>
-                    <TableCell><Badge variant="secondary">{faq.category_en}</Badge></TableCell>
+                    <TableCell><Badge className={getCategoryColor(faq.category_en)}>{faq.category_en}</Badge></TableCell>
                     <TableCell>{faq.is_active ? '✓' : '✗'}</TableCell>
                     <TableCell>
                       <div className="flex gap-1">

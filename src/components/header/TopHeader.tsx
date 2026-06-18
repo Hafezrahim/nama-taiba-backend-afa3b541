@@ -66,7 +66,7 @@ const TopHeader = () => {
   };
 
   return (
-    <div className="bg-[#630d5f] text-white text-sm py-3 hidden md:block">
+    <div className="bg-nama-gold text-nama-purple font-medium text-sm py-3 hidden md:block">
       <div className="container mx-auto px-4">
         <div className={`flex items-center justify-between ${isRTL ? 'flex-row-reverse' : ''}`}>
           {/* Contact Info */}
@@ -74,7 +74,7 @@ const TopHeader = () => {
             {contactInfo?.phone && (
               <a 
                 href={`tel:${formatPhone(contactInfo.phone)}`} 
-                className={`flex items-center gap-2 hover:text-nama-orange transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+                className={`flex items-center gap-2 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 <Phone className="h-4 w-4" />
                 <span dir="ltr">{formatPhone(contactInfo.phone)}</span>
@@ -83,7 +83,7 @@ const TopHeader = () => {
             {contactInfo?.email && (
               <a 
                 href={`mailto:${contactInfo.email}`} 
-                className={`flex items-center gap-2 hover:text-nama-orange transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+                className={`flex items-center gap-2 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 <Mail className="h-4 w-4" />
                 <span>{contactInfo.email}</span>
@@ -95,7 +95,7 @@ const TopHeader = () => {
           <div className={`flex items-center gap-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <Link 
               to="/cart" 
-              className={`flex items-center gap-2 hover:text-nama-orange transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+              className={`flex items-center gap-2 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
             >
               <div className="relative">
                 <ShoppingCart className="h-4 w-4" />
@@ -110,7 +110,7 @@ const TopHeader = () => {
             
             <Link 
               to="/wishlist" 
-              className={`flex items-center gap-2 hover:text-nama-orange transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+              className={`flex items-center gap-2 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
             >
               <div className="relative">
                 <Heart className="h-4 w-4" />
@@ -127,7 +127,7 @@ const TopHeader = () => {
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className={`flex items-center gap-2 hover:text-nama-orange transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <button className={`flex items-center gap-2 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}>
                     {userProfile?.avatar_url ? (
                       <Avatar className="h-5 w-5">
                         <AvatarImage src={userProfile.avatar_url} />
@@ -174,7 +174,7 @@ const TopHeader = () => {
             ) : (
               <Link 
                 to="/login" 
-                className={`flex items-center gap-2 hover:text-nama-orange transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+                className={`flex items-center gap-2 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
               >
                 <LogIn className="h-4 w-4" />
                 <span>{t('Login', 'تسجيل الدخول')}</span>
@@ -184,7 +184,7 @@ const TopHeader = () => {
             {/* Language Switcher */}
             <button 
               onClick={toggleLanguage}
-              className={`flex items-center gap-2 hover:text-nama-orange transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+              className={`flex items-center gap-2 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
             >
               <img 
                 src={language === 'en' ? saFlag : ukFlag} 

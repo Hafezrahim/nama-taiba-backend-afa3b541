@@ -402,7 +402,7 @@ export default function AdminMarketers() {
                   </TableCell>
                   <TableCell>
                     {app.is_processed ? (
-                      <Badge variant="secondary">{t('Processed', 'معالج')}</Badge>
+                      <Badge className="bg-green-500 hover:bg-green-600 text-white">{t('Processed', 'معالج')}</Badge>
                     ) : (
                       <Badge>{t('Pending', 'قيد الانتظار')}</Badge>
                     )}
