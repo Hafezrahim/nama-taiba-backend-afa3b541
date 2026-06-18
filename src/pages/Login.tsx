@@ -41,7 +41,7 @@ const Login = () => {
       if (isAdmin) {
         navigate('/admin');
       } else if (isApproved && allowedPages.length > 0) {
-        navigate('/admin');
+        navigate(allowedPages[0]);
       } else if (isApproved) {
         navigate('/');
       }
@@ -96,7 +96,7 @@ const Login = () => {
           .limit(1);
         
         if (perms && perms.length > 0) {
-          navigate('/admin');
+          navigate(perms[0].page_path);
         } else {
           navigate('/');
         }

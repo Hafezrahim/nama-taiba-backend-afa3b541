@@ -95,20 +95,14 @@ const AdminOrderDetails = () => {
   const [selectedDelivererId, setSelectedDelivererId] = useState<string>('');
 
   useEffect(() => {
-    if (!authLoading && !isAdmin) {
-      navigate('/login');
-    }
-  }, [isAdmin, authLoading, navigate]);
-
-  useEffect(() => {
-    if (isAdmin && orderId) {
+    if (orderId) {
       fetchOrder();
       fetchOrderItems();
       fetchStatusHistory();
       fetchDeliverers();
       fetchShipment();
     }
-  }, [isAdmin, orderId]);
+  }, [orderId]);
 
   const fetchOrder = async () => {
     setIsLoading(true);
@@ -395,7 +389,7 @@ const AdminOrderDetails = () => {
     );
   }
 
-  if (!isAdmin || !order) return null;
+  if (!order) return null;
 
   const statusLabel = statusLabels[order.status] || { en: order.status, ar: order.status };
 

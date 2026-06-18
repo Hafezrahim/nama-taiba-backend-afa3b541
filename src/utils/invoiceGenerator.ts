@@ -86,7 +86,7 @@ const setupArabic = async (doc: jsPDF): Promise<boolean> => {
 
 const loadLogo = async (): Promise<string | null> => {
   try {
-    const res = await fetch('/uploads/b209d6cf-cd6c-41b6-ac17-8fcb2b241da3.png');
+    const res = await fetch('/uploads/logo.png');
     const blob = await res.blob();
     return new Promise(r => {
       const reader = new FileReader();
@@ -141,7 +141,7 @@ const fmtCur = (amt: number, rtl: boolean) =>
   rtl ? `${toArNum(amt.toFixed(2))} ر.س` : `${amt.toFixed(2)} SAR`;
 
 const setFont = (doc: jsPDF, rtl: boolean, hasAr: boolean, style: 'normal' | 'bold' = 'normal') => {
-  if (rtl && hasAr) {
+  if (hasAr) {
     doc.setFont('Amiri', 'normal');
   } else {
     doc.setFont('helvetica', style);
@@ -172,7 +172,7 @@ const drawHeader = (doc: jsPDF, invNum: string, logo: string | null, rtl: boolea
   doc.setFontSize(14);
   setFont(doc, rtl, hasAr, 'bold');
   doc.text(
-    rtl ? 'شركة نما للحلول الصناعية' : 'NAMA Industrial Solutions',
+    rtl ? 'نما طيبة' : 'Nama Taiba',
     textX, 28, { align: rtl ? 'right' : 'left' }
   );
 
@@ -309,7 +309,7 @@ const drawTable = (
     startY,
     theme: 'plain',
     styles: {
-      font: rtl && hasAr ? 'Amiri' : 'helvetica',
+      font: hasAr ? 'Amiri' : 'helvetica',
       fontSize: 9,
       cellPadding: { top: 6, bottom: 6, left: 5, right: 5 },
       lineColor: K.line,
@@ -458,21 +458,41 @@ const generateQRCode = async (data: string): Promise<string | null> => {
   } catch { return null; }
 };
 
-const buildQRData = (
-  invNum: string,
-  clientInfo: ClientInfo,
-  totals: OrderTotals,
-  items: { name: string; qty: number; price: number }[]
-): string => JSON.stringify({
-  inv: invNum,
-  date: new Date().toISOString().split('T')[0],
-  client: clientInfo.name,
-  phone: clientInfo.phone,
-  items: items.map(i => `${i.name} x${i.qty}`).join('; '),
-  total: totals.total.toFixed(2),
-  vat: totals.vat.toFixed(2),
-  currency: 'SAR',
-});
+const buildZatcaQR = (
+  sellerName: string,
+  vatNumber: string,
+  timestamp: string,
+  invoiceTotal: string,
+  vatTotal: string
+): string => {
+  const getB = (tag: number, val: string) => {
+    const encoder = new TextEncoder();
+    const valBytes = encoder.encode(val);
+    return new Uint8Array([tag, valBytes.length, ...valBytes]);
+  };
+
+  const bufs = [
+    getB(1, sellerName),
+    getB(2, vatNumber),
+    getB(3, timestamp),
+    getB(4, invoiceTotal),
+    getB(5, vatTotal)
+  ];
+
+  const totalLength = bufs.reduce((acc, b) => acc + b.length, 0);
+  const result = new Uint8Array(totalLength);
+  let offset = 0;
+  for (const b of bufs) {
+    result.set(b, offset);
+    offset += b.length;
+  }
+
+  let bin = '';
+  for (let i = 0; i < result.length; i++) {
+    bin += String.fromCharCode(result[i]);
+  }
+  return btoa(bin);
+};
 
 const drawQRCode = async (doc: jsPDF, qrData: string, y: number, rtl: boolean, hasAr: boolean) => {
   const qrImg = await generateQRCode(qrData);
@@ -541,12 +561,12 @@ const drawStampWatermark = (doc: jsPDF, rtl: boolean, hasAr: boolean, type: 'pai
 
   const color: [number, number, number] = type === 'paid' ? K.green : K.red;
   const text = type === 'paid'
-    ? (rtl && hasAr ? 'مدفوع' : 'PAID')
-    : (rtl && hasAr ? 'ملغي' : 'CANCELLED');
+    ? (hasAr ? 'مدفوع' : 'PAID')
+    : (hasAr ? 'ملغي' : 'CANCELLED');
 
   doc.setTextColor(...color);
   doc.setFontSize(type === 'cancelled' ? 68 : 85);
-  doc.setFont('helvetica', 'bold');
+  doc.setFont(hasAr ? 'Amiri' : 'helvetica', hasAr ? 'normal' : 'bold');
 
   const cos = Math.cos(angle);
   const sin = Math.sin(angle);
@@ -577,10 +597,14 @@ export const generateInvoice = async (
 ) => {
   const doc = new jsPDF();
   const invNum = `INV-${Date.now().toString().slice(-8)}`;
+  
+  // Check if any item or client name contains Arabic
+  const anyArabic = isArabic(clientInfo.name) || cartItems.some(i => isArabic((i as any).nameAr || '') || isArabic((i as any).nameEn || ''));
   const rtl = options.language === 'ar' || isArabic(clientInfo.name);
+  const needsArabicFont = options.language === 'ar' || anyArabic;
 
   const [hasAr, logo, contact, ...imageResults] = await Promise.all([
-    rtl ? setupArabic(doc) : Promise.resolve(false),
+    needsArabicFont ? setupArabic(doc) : Promise.resolve(false),
     loadLogo(),
     fetchCompanyContact(),
     ...cartItems.map(item => {
@@ -616,12 +640,15 @@ export const generateInvoice = async (
   const tableEndY = drawTable(doc, rows, headers, infoEndY, rtl, ar, imageDataUrls);
   drawSummary(doc, totals, tableEndY + 8, rtl, ar);
 
-  const qrItems = cartItems.map(item => ({
-    name: rtl ? ((item as any).nameAr || item.nameEn) : item.nameEn,
-    qty: item.quantity,
-    price: item.price,
-  }));
-  const qrData = buildQRData(invNum, clientInfo, totals, qrItems);
+  const sellerName = 'Nama Taiba';
+  const timestamp = new Date().toISOString();
+  const qrData = buildZatcaQR(
+    sellerName,
+    contact.vatNumber || '310000000000003',
+    timestamp,
+    totals.total.toFixed(2),
+    totals.vat.toFixed(2)
+  );
   await drawQRCode(doc, qrData, tableEndY + 10, rtl, ar);
 
   drawFooter(doc, rtl, ar, contact);
@@ -667,10 +694,12 @@ export const generateOfferInvoice = async (
 ) => {
   const doc = new jsPDF();
   const invNum = `OFF-${Date.now().toString().slice(-8)}`;
-  const rtl = options.language === 'ar' || isArabic(offer.title);
+  const anyArabic = isArabic(offer.title);
+  const rtl = options.language === 'ar' || anyArabic;
+  const needsArabicFont = options.language === 'ar' || anyArabic;
 
   const [hasAr, logo, contact] = await Promise.all([
-    rtl ? setupArabic(doc) : Promise.resolve(false),
+    needsArabicFont ? setupArabic(doc) : Promise.resolve(false),
     loadLogo(),
     fetchCompanyContact(),
   ]);
@@ -696,9 +725,15 @@ export const generateOfferInvoice = async (
   const tableEndY = drawTable(doc, [rtl ? row.reverse() : row], headers, infoEndY, rtl, ar);
   drawSummary(doc, totals, tableEndY + 8, rtl, ar);
 
-  const qrData = buildQRData(invNum, clientInfo, totals, [
-    { name: offer.title, qty: offer.quantity, price: offer.unitPrice },
-  ]);
+  const sellerName = 'Nama Taiba';
+  const timestamp = new Date().toISOString();
+  const qrData = buildZatcaQR(
+    sellerName,
+    contact.vatNumber || '310000000000003',
+    timestamp,
+    totals.total.toFixed(2),
+    totals.vat.toFixed(2)
+  );
   await drawQRCode(doc, qrData, tableEndY + 10, rtl, ar);
 
   drawFooter(doc, rtl, ar, contact);

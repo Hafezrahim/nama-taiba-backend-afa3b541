@@ -142,12 +142,8 @@ const AdminOrders = () => {
   const [invoiceItems, setInvoiceItems] = useState<any[]>([]);
 
   useEffect(() => {
-    if (!loading && !isAdmin) navigate('/login');
-  }, [isAdmin, loading, navigate]);
-
-  useEffect(() => {
-    if (isAdmin) fetchOrders();
-  }, [isAdmin]);
+    fetchOrders();
+  }, []);
 
   const fetchOrders = async () => {
     setIsLoading(true);
@@ -241,21 +237,64 @@ const AdminOrders = () => {
   };
 
   // ── Export ──
-  const exportCSV = async () => {
+  const exportExcel = async () => {
     setIsExporting(true);
-    let data = orders;
-    if (dateFrom) data = data.filter(o => new Date(o.created_at) >= dateFrom);
-    if (dateTo) { const end = new Date(dateTo); end.setHours(23, 59, 59); data = data.filter(o => new Date(o.created_at) <= end); }
-    if (data.length === 0) { toast({ title: t('No orders to export', 'لا توجد طلبات للتصدير'), variant: 'destructive' }); setIsExporting(false); return; }
+    try {
+      const XLSX = await import('xlsx');
+      let data = orders;
+      if (dateFrom) data = data.filter(o => new Date(o.created_at) >= dateFrom);
+      if (dateTo) { const end = new Date(dateTo); end.setHours(23, 59, 59); data = data.filter(o => new Date(o.created_at) <= end); }
+      if (data.length === 0) { toast({ title: t('No orders to export', 'لا توجد طلبات للتصدير'), variant: 'destructive' }); setIsExporting(false); return; }
 
-    const h = [language === 'ar' ? 'رقم الطلب' : 'Order ID', language === 'ar' ? 'العميل' : 'Customer', language === 'ar' ? 'الهاتف' : 'Phone', language === 'ar' ? 'الإجمالي' : 'Total', language === 'ar' ? 'الحالة' : 'Status', language === 'ar' ? 'المصدر' : 'Source', language === 'ar' ? 'التاريخ' : 'Date'];
-    const rows = data.map(o => [o.id, o.customer_name, o.customer_phone, o.total.toFixed(2), statusConfig[o.status]?.[language === 'ar' ? 'ar' : 'en'] || o.status, o.reference_source || '', format(new Date(o.created_at), 'yyyy-MM-dd HH:mm')]);
-    const csv = '\uFEFF' + [h.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = `orders-${format(new Date(), 'yyyy-MM-dd')}.csv`; a.click();
-    URL.revokeObjectURL(url);
-    toast({ title: t('Exported successfully', 'تم التصدير بنجاح') });
+      const headers = [
+        language === 'ar' ? 'رقم الطلب' : 'Order ID',
+        language === 'ar' ? 'العميل' : 'Customer Name',
+        language === 'ar' ? 'الهاتف' : 'Phone',
+        language === 'ar' ? 'العنوان' : 'Address',
+        language === 'ar' ? 'المجموع الفرعي' : 'Subtotal',
+        language === 'ar' ? 'الشحن' : 'Shipping',
+        language === 'ar' ? 'الخصم' : 'Discount',
+        language === 'ar' ? 'الإجمالي' : 'Total',
+        language === 'ar' ? 'الحالة' : 'Status',
+        language === 'ar' ? 'المصدر' : 'Source',
+        language === 'ar' ? 'ملاحظات' : 'Notes',
+        language === 'ar' ? 'التاريخ' : 'Date'
+      ];
+      
+      const rows = data.map(o => [
+        o.id,
+        o.customer_name,
+        o.customer_phone,
+        o.customer_address,
+        o.subtotal,
+        o.shipping,
+        o.discount,
+        o.total,
+        statusConfig[o.status]?.[language === 'ar' ? 'ar' : 'en'] || o.status,
+        referenceOptions.find(r => r.value === o.reference_source)?.[language === 'ar' ? 'ar' : 'en'] || o.reference_source || '',
+        o.notes || '',
+        format(new Date(o.created_at), 'yyyy-MM-dd HH:mm')
+      ]);
+
+      const worksheetData = [headers, ...rows];
+      const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+      
+      // Auto-size columns
+      worksheet['!cols'] = [
+        { wch: 36 }, { wch: 25 }, { wch: 15 }, { wch: 30 },
+        { wch: 10 }, { wch: 10 }, { wch: 10 }, { wch: 10 },
+        { wch: 15 }, { wch: 15 }, { wch: 30 }, { wch: 20 }
+      ];
+
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Orders");
+      XLSX.writeFile(workbook, `orders-${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
+      
+      toast({ title: t('Exported successfully', 'تم التصدير بنجاح') });
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({ title: t('Export failed', 'فشل التصدير'), variant: 'destructive' });
+    }
     setIsExporting(false);
   };
 
@@ -365,7 +404,6 @@ const AdminOrders = () => {
   };
 
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
-  if (!isAdmin) return null;
 
   return (
     <div className="space-y-6">
@@ -599,7 +637,7 @@ const AdminOrders = () => {
               <div className="space-y-1"><Label className="text-xs">{t('To', 'إلى')}</Label>
                 <Popover><PopoverTrigger asChild><Button variant="outline" size="sm" className={cn("w-32 justify-start text-start", !dateTo && "text-muted-foreground")}><CalendarIcon className="h-3.5 w-3.5 me-1.5" />{dateTo ? format(dateTo, 'MM/dd') : t('Date', 'تاريخ')}</Button></PopoverTrigger><PopoverContent className="w-auto p-0" align="start"><Calendar mode="single" selected={dateTo} onSelect={setDateTo} /></PopoverContent></Popover>
               </div>
-              <Button size="sm" onClick={exportCSV} disabled={isExporting} className="gap-1.5"><Download className="h-3.5 w-3.5" />{t('Export CSV', 'تصدير')}</Button>
+              <Button size="sm" onClick={exportExcel} disabled={isExporting} className="gap-1.5"><Download className="h-3.5 w-3.5" />{t('Export Excel', 'تصدير إكسل')}</Button>
             </div>
           )}
 

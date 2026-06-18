@@ -3,6 +3,7 @@ import {
   BrowserRouter as Router,
   Route,
   Routes,
+  Navigate,
 } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import Index from "./pages/Index";
@@ -42,6 +43,13 @@ const Profile = lazy(() => import('./pages/Profile'));
 const Install = lazy(() => import('./pages/Install'));
 const SupportTickets = lazy(() => import('./pages/SupportTickets'));
 
+// Lazy-loaded client pages
+const ClientLayout = lazy(() => import('./components/client/ClientLayout').then(m => ({ default: m.ClientLayout })));
+const ClientDashboard = lazy(() => import('./pages/client/ClientDashboard'));
+const ClientOrders = lazy(() => import('./pages/client/ClientOrders'));
+const ClientQuote = lazy(() => import('./pages/client/ClientQuote'));
+const ClientMyQuotes = lazy(() => import('./pages/client/ClientMyQuotes'));
+
 // Lazy-loaded admin pages
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout').then(m => ({ default: m.AdminLayout })));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -64,6 +72,7 @@ const AdminRoles = lazy(() => import('./pages/admin/AdminRoles'));
 const AdminAbout = lazy(() => import('./pages/admin/AdminAbout'));
 const AdminContacts = lazy(() => import('./pages/admin/AdminContacts'));
 const AdminQuotes = lazy(() => import('./pages/admin/AdminQuotes'));
+const AdminQuoteDetails = lazy(() => import('./pages/admin/AdminQuoteDetails'));
 const AdminMarketers = lazy(() => import('./pages/admin/AdminMarketers'));
 const AdminSettings = lazy(() => import('./pages/admin/AdminSettings'));
 const AdminSEO = lazy(() => import('./pages/admin/AdminSEO'));
@@ -117,9 +126,19 @@ function App() {
                       <Route path="/login" element={<Login />} />
                       <Route path="/signup" element={<SignUp />} />
                       <Route path="/order-confirmation" element={<OrderConfirmation />} />
-                      <Route path="/profile" element={<Profile />} />
+                      <Route path="/profile" element={<Navigate to="/client/profile" replace />} />
                       <Route path="/install" element={<Install />} />
-                      <Route path="/support" element={<SupportTickets />} />
+                      <Route path="/support" element={<Navigate to="/client/tickets" replace />} />
+
+                      {/* Client Routes */}
+                      <Route path="/client" element={<ClientLayout />}>
+                        <Route index element={<ClientDashboard />} />
+                        <Route path="orders" element={<ClientOrders />} />
+                        <Route path="quote" element={<ClientQuote />} />
+                        <Route path="quotes" element={<ClientMyQuotes />} />
+                        <Route path="tickets" element={<SupportTickets />} />
+                        <Route path="profile" element={<Profile />} />
+                      </Route>
                       
                       {/* Admin Routes */}
                       <Route path="/admin" element={<AdminLayout />}>
@@ -144,6 +163,7 @@ function App() {
                         <Route path="about" element={<AdminAbout />} />
                         <Route path="contacts" element={<AdminContacts />} />
                         <Route path="quotes" element={<AdminQuotes />} />
+                        <Route path="quotes/:id" element={<AdminQuoteDetails />} />
                         <Route path="marketers" element={<AdminMarketers />} />
                         <Route path="settings" element={<AdminSettings />} />
                         <Route path="seo" element={<AdminSEO />} />

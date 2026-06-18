@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Check, Trash2, FilterX } from 'lucide-react';
+import { Check, Trash2, FilterX, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
 import AdminTablePagination from '@/components/admin/AdminTablePagination';
 
 interface QuoteRequest {
@@ -30,6 +31,7 @@ const extractProduct = (message?: string) => {
 
 export default function AdminQuotes() {
   const { t, isRTL } = useLanguage();
+  const navigate = useNavigate();
   const [quotes, setQuotes] = useState<QuoteRequest[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -237,6 +239,14 @@ export default function AdminQuotes() {
                   <TableCell>{new Date(quote.created_at).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => navigate(`/admin/quotes/${quote.id}`)}
+                        title={t('View Details', 'عرض التفاصيل')}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       {!quote.is_processed && (
                         <Button
                           variant="outline"

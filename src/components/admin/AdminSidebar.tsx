@@ -8,6 +8,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const menuItems = [{
   group: 'Overview',
@@ -207,15 +209,59 @@ export function AdminSidebar() {
   const currentPath = location.pathname;
   const collapsed = state === 'collapsed';
 
+  // Fetch counts for badges
+  const { data: counts } = useQuery({
+    queryKey: ['adminSidebarCounts'],
+    queryFn: async () => {
+      const [
+        orders,
+        quotes,
+        contacts,
+        tickets,
+        marketers,
+        security,
+        shipments
+      ] = await Promise.all([
+        supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('quote_requests').select('*', { count: 'exact', head: true }).eq('is_processed', false),
+        supabase.from('contact_submissions').select('*', { count: 'exact', head: true }).eq('is_read', false),
+        supabase.from('support_tickets').select('*', { count: 'exact', head: true }).eq('status', 'open'),
+        supabase.from('marketer_applications').select('*', { count: 'exact', head: true }).eq('is_processed', false),
+        supabase.from('security_events').select('*', { count: 'exact', head: true }).eq('resolved', false),
+        supabase.from('shipments').select('*', { count: 'exact', head: true }).eq('status', 'pending')
+      ]);
+
+      return {
+        '/admin/orders': orders.count || 0,
+        '/admin/quotes': quotes.count || 0,
+        '/admin/contacts': contacts.count || 0,
+        '/admin/tickets': tickets.count || 0,
+        '/admin/marketers': marketers.count || 0,
+        '/admin/security': security.count || 0,
+        '/admin/shipments': shipments.count || 0,
+      };
+    },
+    refetchInterval: 30000 // Refresh every 30 seconds
+  });
+
   // Filter menu items based on permissions (admins see everything)
   const filteredMenuItems = useMemo(() => {
-    if (isAdmin) return menuItems;
-    return menuItems
-      .map(group => ({
-        ...group,
-        items: group.items.filter(item => allowedPages.includes(item.url)),
-      }))
-      .filter(group => group.items.length > 0);
+    if (isAdmin) return menuItems.map(g => ({ ...g, isFlat: false }));
+    
+    // For staff, create a single flat list without the Dashboard
+    const allAllowedItems = menuItems
+      .flatMap(g => g.items)
+      .filter(item => item.url !== '/admin' && allowedPages.includes(item.url));
+      
+    return [
+      {
+        group: 'Assigned Modules',
+        groupAr: 'الوحدات المخصصة',
+        icon: LayoutDashboard,
+        items: allAllowedItems,
+        isFlat: true
+      }
+    ];
   }, [isAdmin, allowedPages]);
 
   // Track which groups are open
@@ -252,15 +298,54 @@ export function AdminSidebar() {
             // Collapsed view - show only icons
             <SidebarGroupContent>
                     <SidebarMenu>
-                      {group.items.map(item => <SidebarMenuItem key={item.url}>
-                          <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                            <NavLink to={item.url} end={item.url === '/admin'} className={cn("flex items-center justify-center w-10 h-10 mx-auto rounded-lg transition-all duration-200", isActive(item.url) ? "bg-primary text-primary-foreground shadow-md" : "text-sidebar-foreground hover:bg-sidebar-accent")} title={isRTL ? item.titleAr : item.title}>
-                              <item.icon className="h-5 w-5" />
-                            </NavLink>
-                          </SidebarMenuButton>
-                        </SidebarMenuItem>)}
+                      {group.items.map(item => {
+                        const badgeCount = counts?.[item.url as keyof typeof counts] || 0;
+                        return (
+                          <SidebarMenuItem key={item.url}>
+                            <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                              <NavLink to={item.url} end={item.url === '/admin'} className={cn("flex items-center justify-center w-10 h-10 mx-auto rounded-lg transition-all duration-200 relative", isActive(item.url) ? "bg-primary text-primary-foreground shadow-md" : "text-sidebar-foreground hover:bg-sidebar-accent")} title={isRTL ? item.titleAr : item.title}>
+                                <item.icon className="h-5 w-5" />
+                                {badgeCount > 0 && (
+                                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1 py-0.5 rounded-full min-w-[18px] text-center border-2 border-sidebar-background">
+                                    {badgeCount > 99 ? '99+' : badgeCount}
+                                  </span>
+                                )}
+                              </NavLink>
+                            </SidebarMenuButton>
+                          </SidebarMenuItem>
+                        );
+                      })}
                     </SidebarMenu>
-                  </SidebarGroupContent> :
+                  </SidebarGroupContent> : group.isFlat ? 
+                  // Flat view without collapsibles
+                  <SidebarGroupContent className="mt-2">
+                    <SidebarMenu className="space-y-1">
+                      {group.items.map(item => {
+                          const badgeCount = counts?.[item.url as keyof typeof counts] || 0;
+                          return (
+                            <SidebarMenuItem key={item.url}>
+                              <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                                <NavLink to={item.url} end={item.url === '/admin'} className={cn("flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative", isActive(item.url) ? "bg-primary text-primary-foreground font-semibold shadow-sm" : "text-sidebar-foreground hover:bg-sidebar-accent", isRTL && "flex-row-reverse text-right")}>
+                                  <item.icon className={cn("h-4 w-4 shrink-0 transition-transform duration-200", !isActive(item.url) && "group-hover:scale-110")} />
+                                  <span className="flex-1 truncate">
+                                    {isRTL ? item.titleAr : item.title}
+                                  </span>
+                                  {badgeCount > 0 && (
+                                    <span className={cn(
+                                      "bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-auto flex items-center justify-center",
+                                      isRTL ? "ml-0 mr-auto" : "ml-auto"
+                                    )}>
+                                      {badgeCount > 99 ? '99+' : badgeCount}
+                                    </span>
+                                  )}
+                                </NavLink>
+                              </SidebarMenuButton>
+                            </SidebarMenuItem>
+                          );
+                        })}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                  :
             // Expanded view with collapsible groups
             <Collapsible open={isOpen} onOpenChange={() => toggleGroup(group.group)}>
                     <CollapsibleTrigger className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200", groupActive ? "text-primary bg-primary/5" : "text-sidebar-foreground hover:bg-sidebar-accent", isRTL && "flex-row-reverse text-right")}>
@@ -268,23 +353,46 @@ export function AdminSidebar() {
                       <span className="flex-1 text-start">
                         {isRTL ? group.groupAr : group.group}
                       </span>
+                      {(() => {
+                        const groupBadgeCount = group.items.reduce((total, item) => total + (counts?.[item.url as keyof typeof counts] || 0), 0);
+                        return groupBadgeCount > 0 ? (
+                          <span className={cn(
+                            "bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center flex items-center justify-center mx-1"
+                          )}>
+                            {groupBadgeCount > 99 ? '99+' : groupBadgeCount}
+                          </span>
+                        ) : null;
+                      })()}
                       <ChevronDown className={cn("h-4 w-4 text-muted-foreground transition-transform duration-200", isOpen && "rotate-180")} />
                     </CollapsibleTrigger>
                     
                     <CollapsibleContent className="overflow-hidden data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
                       <SidebarGroupContent className={cn("mt-1 border-sidebar-border", isRTL ? "mr-4 border-r pr-2" : "ms-4 border-s ps-2")}>
                         <SidebarMenu className="space-y-0.5">
-                          {group.items.map(item => <SidebarMenuItem key={item.url}>
-                              <SidebarMenuButton asChild isActive={isActive(item.url)}>
-                                <NavLink to={item.url} end={item.url === '/admin'} className={cn("flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 group", isActive(item.url) ? "bg-primary text-primary-foreground font-semibold shadow-sm" : "text-sidebar-foreground hover:bg-sidebar-accent", isRTL && "flex-row-reverse text-right")}>
-                                  <item.icon className={cn("h-4 w-4 shrink-0 transition-transform duration-200", !isActive(item.url) && "group-hover:scale-110")} />
-                                  <span className="flex-1 truncate">
-                                    {isRTL ? item.titleAr : item.title}
-                                  </span>
-                                  {isActive(item.url) && <ChevronRight className="h-3.5 w-3.5 opacity-70" />}
-                                </NavLink>
-                              </SidebarMenuButton>
-                            </SidebarMenuItem>)}
+                          {group.items.map(item => {
+                              const badgeCount = counts?.[item.url as keyof typeof counts] || 0;
+                              return (
+                                <SidebarMenuItem key={item.url}>
+                                  <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                                    <NavLink to={item.url} end={item.url === '/admin'} className={cn("flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 group relative", isActive(item.url) ? "bg-primary text-primary-foreground font-semibold shadow-sm" : "text-sidebar-foreground hover:bg-sidebar-accent", isRTL && "flex-row-reverse text-right")}>
+                                      <item.icon className={cn("h-4 w-4 shrink-0 transition-transform duration-200", !isActive(item.url) && "group-hover:scale-110")} />
+                                      <span className="flex-1 truncate">
+                                        {isRTL ? item.titleAr : item.title}
+                                      </span>
+                                      {badgeCount > 0 && (
+                                        <span className={cn(
+                                          "bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center ml-auto flex items-center justify-center",
+                                          isRTL ? "ml-0 mr-auto" : "ml-auto"
+                                        )}>
+                                          {badgeCount > 99 ? '99+' : badgeCount}
+                                        </span>
+                                      )}
+                                      {!badgeCount && isActive(item.url) && <ChevronRight className={cn("h-3.5 w-3.5 opacity-70", isRTL ? "ml-0 mr-auto rotate-180" : "ml-auto")} />}
+                                    </NavLink>
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                              );
+                            })}
                         </SidebarMenu>
                       </SidebarGroupContent>
                     </CollapsibleContent>

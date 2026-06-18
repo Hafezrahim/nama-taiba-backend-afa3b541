@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -180,9 +178,8 @@ const SupportTickets = () => {
   return (
     <>
       <SEO titleEn="Support Tickets" titleAr="تذاكر الدعم" descriptionEn="Manage your support tickets" descriptionAr="إدارة تذاكر الدعم الخاصة بك" />
-      <Header />
-      <div className={cn("min-h-screen bg-background pt-24 pb-16 px-4", isRTL && "rtl")} dir={isRTL ? 'rtl' : 'ltr'}>
-        <div className="max-w-6xl mx-auto">
+      <div className={cn("space-y-6", isRTL && "rtl")} dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="max-w-6xl">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold">{t('Support Tickets', 'تذاكر الدعم')}</h1>
             <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -340,7 +337,6 @@ const SupportTickets = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 };

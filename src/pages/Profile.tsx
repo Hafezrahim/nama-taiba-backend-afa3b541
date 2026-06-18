@@ -4,8 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -58,7 +56,7 @@ const Profile = () => {
         .select('*')
         .eq('id', user.id)
         .maybeSingle();
-      
+
       if (error) throw error;
       return data;
     },
@@ -166,7 +164,7 @@ const Profile = () => {
   const updateProfileMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
       if (!user?.id) throw new Error('Not authenticated');
-      
+
       const { error } = await supabase
         .from('profiles')
         .upsert({
@@ -174,7 +172,7 @@ const Profile = () => {
           ...data,
           updated_at: new Date().toISOString(),
         });
-      
+
       if (error) throw error;
     },
     onSuccess: () => {
@@ -215,7 +213,7 @@ const Profile = () => {
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (passwordData.newPassword !== passwordData.confirmPassword) {
       toast({
         title: t('Error', 'خطأ'),
@@ -266,12 +264,8 @@ const Profile = () => {
 
   if (authLoading || profileLoading) {
     return (
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-grow flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </main>
-        <Footer />
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -289,273 +283,267 @@ const Profile = () => {
   };
 
   return (
-    <div className={`min-h-screen flex flex-col ${isRTL ? 'rtl' : 'ltr'}`}>
-      <Header />
-      
-      <main className="flex-grow py-12 bg-muted/30">
-        <div className="container mx-auto px-4 max-w-2xl">
-          <Card>
-            <CardHeader className="text-center">
-              {/* Avatar with upload button */}
-              <div className="flex justify-center mb-4">
-                <div className="relative group">
-                  <Avatar className="h-24 w-24">
-                    <AvatarImage src={profile?.avatar_url || ''} />
-                    <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
-                      {getInitials()}
-                    </AvatarFallback>
-                  </Avatar>
-                  
-                  {/* Upload overlay */}
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploadingAvatar}
-                    className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-not-allowed"
-                  >
-                    {isUploadingAvatar ? (
-                      <Loader2 className="h-6 w-6 text-white animate-spin" />
-                    ) : (
-                      <Camera className="h-6 w-6 text-white" />
-                    )}
-                  </button>
-                  
-                  {/* Hidden file input */}
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarUpload}
-                    className="hidden"
-                  />
-                </div>
-              </div>
-              
-              {/* Upload hint */}
-              <p className="text-xs text-muted-foreground mb-2">
-                {t('Click on avatar to upload a new photo', 'اضغط على الصورة لرفع صورة جديدة')}
-              </p>
-              
-              <CardTitle className="text-2xl">
-                {t('My Profile', 'ملفي الشخصي')}
-              </CardTitle>
-              <CardDescription className="flex items-center justify-center gap-2">
-                <Mail className="h-4 w-4" />
-                {user.email}
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="full_name_en">
-                      {t('Full Name (English)', 'الاسم الكامل (إنجليزي)')}
-                    </Label>
-                    <div className="relative">
-                      <User className={`absolute top-3 h-4 w-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
-                      <Input
-                        id="full_name_en"
-                        name="full_name_en"
-                        value={formData.full_name_en}
-                        onChange={handleChange}
-                        className={isRTL ? 'pr-10' : 'pl-10'}
-                        placeholder="John Doe"
-                        dir="ltr"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="full_name_ar">
-                      {t('Full Name (Arabic)', 'الاسم الكامل (عربي)')}
-                    </Label>
-                    <div className="relative">
-                      <User className={`absolute top-3 h-4 w-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
-                      <Input
-                        id="full_name_ar"
-                        name="full_name_ar"
-                        value={formData.full_name_ar}
-                        onChange={handleChange}
-                        className={isRTL ? 'pr-10' : 'pl-10'}
-                        placeholder="محمد أحمد"
-                        dir="rtl"
-                      />
-                    </div>
-                  </div>
-                </div>
+    <div className={`space-y-6 ${isRTL ? 'rtl' : 'ltr'}`}>
+      <div className="max-w-2xl">
+        <Card>
+          <CardHeader className="text-center">
+            {/* Avatar with upload button */}
+            <div className="flex justify-center mb-4">
+              <div className="relative group">
+                <Avatar className="h-24 w-24">
+                  <AvatarImage src={profile?.avatar_url || ''} />
+                  <AvatarFallback className="text-2xl bg-primary text-primary-foreground">
+                    {getInitials()}
+                  </AvatarFallback>
+                </Avatar>
 
-                {/* Phone */}
+                {/* Upload overlay */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploadingAvatar}
+                  className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer disabled:cursor-not-allowed"
+                >
+                  {isUploadingAvatar ? (
+                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                  ) : (
+                    <Camera className="h-6 w-6 text-white" />
+                  )}
+                </button>
+
+                {/* Hidden file input */}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleAvatarUpload}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Upload hint */}
+            <p className="text-xs text-muted-foreground mb-2">
+              {t('Click on avatar to upload a new photo', 'اضغط على الصورة لرفع صورة جديدة')}
+            </p>
+
+            <CardTitle className="text-2xl">
+              {t('My Profile', 'ملفي الشخصي')}
+            </CardTitle>
+            <CardDescription className="flex items-center justify-center gap-2">
+              <Mail className="h-4 w-4" />
+              {user.email}
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Name Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="phone">
-                    {t('Phone Number', 'رقم الهاتف')}
+                  <Label htmlFor="full_name_en">
+                    {t('Full Name (English)', 'الاسم الكامل (إنجليزي)')}
                   </Label>
                   <div className="relative">
-                    <Phone className={`absolute top-3 h-4 w-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
+                    <User className={`absolute top-3 h-4 w-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
                     <Input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      value={formData.phone}
+                      id="full_name_en"
+                      name="full_name_en"
+                      value={formData.full_name_en}
                       onChange={handleChange}
                       className={isRTL ? 'pr-10' : 'pl-10'}
-                      placeholder="+966 50 123 4567"
+                      placeholder="hafez Rahim"
                       dir="ltr"
                     />
                   </div>
                 </div>
 
-                {/* Bio Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="bio_en">
-                      {t('Bio (English)', 'نبذة (إنجليزي)')}
-                    </Label>
-                    <Textarea
-                      id="bio_en"
-                      name="bio_en"
-                      value={formData.bio_en}
+                <div className="space-y-2">
+                  <Label htmlFor="full_name_ar">
+                    {t('Full Name (Arabic)', 'الاسم الكامل (عربي)')}
+                  </Label>
+                  <div className="relative">
+                    <User className={`absolute top-3 h-4 w-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
+                    <Input
+                      id="full_name_ar"
+                      name="full_name_ar"
+                      value={formData.full_name_ar}
                       onChange={handleChange}
-                      placeholder={t('Tell us about yourself...', 'أخبرنا عن نفسك...')}
-                      rows={3}
-                      dir="ltr"
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="bio_ar">
-                      {t('Bio (Arabic)', 'نبذة (عربي)')}
-                    </Label>
-                    <Textarea
-                      id="bio_ar"
-                      name="bio_ar"
-                      value={formData.bio_ar}
-                      onChange={handleChange}
-                      placeholder={t('Tell us about yourself...', 'أخبرنا عن نفسك...')}
-                      rows={3}
+                      className={isRTL ? 'pr-10' : 'pl-10'}
+                      placeholder="محمد أحمد"
                       dir="rtl"
                     />
                   </div>
                 </div>
+              </div>
 
-                {/* Submit Button */}
-                <Button 
-                  type="submit" 
-                  className="w-full"
-                  disabled={updateProfileMutation.isPending}
-                >
-                  {updateProfileMutation.isPending ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {t('Saving...', 'جاري الحفظ...')}
-                    </>
-                  ) : (
-                    <>
-                      <Save className="h-4 w-4" />
-                      {t('Save Changes', 'حفظ التغييرات')}
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+              {/* Phone */}
+              <div className="space-y-2">
+                <Label htmlFor="phone">
+                  {t('Phone Number', 'رقم الهاتف')}
+                </Label>
+                <div className="relative">
+                  <Phone className={`absolute top-3 h-4 w-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
+                  <Input
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className={isRTL ? 'pr-10' : 'pl-10'}
+                    placeholder="+966 50 123 4567"
+                    dir="ltr"
+                  />
+                </div>
+              </div>
 
-          {/* Password Change Card */}
-          <Card className="mt-6">
-            <CardHeader>
-              <CardTitle className={`text-xl flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <Lock className="h-5 w-5" />
-                {t('Change Password', 'تغيير كلمة المرور')}
-              </CardTitle>
-              <CardDescription>
-                {t('Update your account password', 'تحديث كلمة مرور حسابك')}
-              </CardDescription>
-            </CardHeader>
-            
-            <CardContent>
-              <form onSubmit={handlePasswordSubmit} className="space-y-4">
-                {/* New Password */}
+              {/* Bio Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword">
-                    {t('New Password', 'كلمة المرور الجديدة')}
+                  <Label htmlFor="bio_en">
+                    {t('Bio (English)', 'نبذة (إنجليزي)')}
                   </Label>
-                  <div className="relative">
-                    <Lock className={`absolute top-3 h-4 w-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
-                    <Input
-                      id="newPassword"
-                      name="newPassword"
-                      type={showNewPassword ? 'text' : 'password'}
-                      value={passwordData.newPassword}
-                      onChange={handlePasswordChange}
-                      className={isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'}
-                      placeholder="••••••••"
-                      minLength={6}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPassword(!showNewPassword)}
-                      className={`absolute top-3 text-muted-foreground hover:text-foreground ${isRTL ? 'left-3' : 'right-3'}`}
-                    >
-                      {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
+                  <Textarea
+                    id="bio_en"
+                    name="bio_en"
+                    value={formData.bio_en}
+                    onChange={handleChange}
+                    placeholder={t('Tell us about yourself...', 'أخبرنا عن نفسك...')}
+                    rows={3}
+                    dir="ltr"
+                  />
                 </div>
 
-                {/* Confirm Password */}
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">
-                    {t('Confirm New Password', 'تأكيد كلمة المرور الجديدة')}
+                  <Label htmlFor="bio_ar">
+                    {t('Bio (Arabic)', 'نبذة (عربي)')}
                   </Label>
-                  <div className="relative">
-                    <Lock className={`absolute top-3 h-4 w-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
-                    <Input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={passwordData.confirmPassword}
-                      onChange={handlePasswordChange}
-                      className={isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'}
-                      placeholder="••••••••"
-                      minLength={6}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className={`absolute top-3 text-muted-foreground hover:text-foreground ${isRTL ? 'left-3' : 'right-3'}`}
-                    >
-                      {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
-                  </div>
+                  <Textarea
+                    id="bio_ar"
+                    name="bio_ar"
+                    value={formData.bio_ar}
+                    onChange={handleChange}
+                    placeholder={t('Tell us about yourself...', 'أخبرنا عن نفسك...')}
+                    rows={3}
+                    dir="rtl"
+                  />
                 </div>
+              </div>
 
-                <Button 
-                  type="submit" 
-                  variant="secondary"
-                  className="w-full"
-                  disabled={isChangingPassword}
-                >
-                  {isChangingPassword ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      {t('Updating...', 'جاري التحديث...')}
-                    </>
-                  ) : (
-                    <>
-                      <Lock className="h-4 w-4" />
-                      {t('Update Password', 'تحديث كلمة المرور')}
-                    </>
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
-      
-      <Footer />
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={updateProfileMutation.isPending}
+              >
+                {updateProfileMutation.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t('Saving...', 'جاري الحفظ...')}
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    {t('Save Changes', 'حفظ التغييرات')}
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+
+        {/* Password Change Card */}
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className={`text-xl flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
+              <Lock className="h-5 w-5" />
+              {t('Change Password', 'تغيير كلمة المرور')}
+            </CardTitle>
+            <CardDescription>
+              {t('Update your account password', 'تحديث كلمة مرور حسابك')}
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              {/* New Password */}
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">
+                  {t('New Password', 'كلمة المرور الجديدة')}
+                </Label>
+                <div className="relative">
+                  <Lock className={`absolute top-3 h-4 w-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
+                  <Input
+                    id="newPassword"
+                    name="newPassword"
+                    type={showNewPassword ? 'text' : 'password'}
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordChange}
+                    className={isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'}
+                    placeholder="••••••••"
+                    minLength={6}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className={`absolute top-3 text-muted-foreground hover:text-foreground ${isRTL ? 'left-3' : 'right-3'}`}
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Confirm Password */}
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">
+                  {t('Confirm New Password', 'تأكيد كلمة المرور الجديدة')}
+                </Label>
+                <div className="relative">
+                  <Lock className={`absolute top-3 h-4 w-4 text-muted-foreground ${isRTL ? 'right-3' : 'left-3'}`} />
+                  <Input
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordChange}
+                    className={isRTL ? 'pr-10 pl-10' : 'pl-10 pr-10'}
+                    placeholder="••••••••"
+                    minLength={6}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className={`absolute top-3 text-muted-foreground hover:text-foreground ${isRTL ? 'left-3' : 'right-3'}`}
+                  >
+                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                variant="secondary"
+                className="w-full"
+                disabled={isChangingPassword}
+              >
+                {isChangingPassword ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t('Updating...', 'جاري التحديث...')}
+                  </>
+                ) : (
+                  <>
+                    <Lock className="h-4 w-4" />
+                    {t('Update Password', 'تحديث كلمة المرور')}
+                  </>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

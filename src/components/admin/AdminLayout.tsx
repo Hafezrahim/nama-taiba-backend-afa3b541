@@ -72,18 +72,25 @@ export function AdminLayout() {
 
   useKeyboardShortcuts(handleSearchOpen, handleHelpOpen);
 
+  // Check if current page is allowed for non-admin users
+  const currentPath = location.pathname;
+  
+  // For admins, /admin is the dashboard. For staff, they will be redirected by the useEffect above.
+  const isDashboardRoot = currentPath === '/admin' || currentPath === '/admin/';
+
   useEffect(() => {
     if (!loading && !hasAdminAccess) {
       navigate('/login');
+    } else if (!loading && !isAdmin && isDashboardRoot && allowedPages.length > 0) {
+      navigate(allowedPages[0], { replace: true });
     }
-  }, [hasAdminAccess, loading, navigate]);
+  }, [hasAdminAccess, loading, navigate, isAdmin, isDashboardRoot, allowedPages]);
 
-  // Check if current page is allowed for non-admin users
-  const currentPath = location.pathname;
-  const isPageAllowed = isAdmin || allowedPages.some(page => {
-    if (page === '/admin') return currentPath === '/admin';
+  const isPageAllowed = isAdmin || isDashboardRoot || allowedPages.some(page => {
+    if (page === '/admin') return isDashboardRoot;
     return currentPath.startsWith(page);
   });
+
 
   if (loading) {
     return (

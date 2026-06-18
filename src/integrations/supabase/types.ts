@@ -1058,6 +1058,7 @@ export type Database = {
           id: string
           is_processed: boolean | null
           message: string | null
+          admin_reply: string | null
           name: string
           offer_id: string | null
           phone: string | null
@@ -1071,6 +1072,7 @@ export type Database = {
           id?: string
           is_processed?: boolean | null
           message?: string | null
+          admin_reply?: string | null
           name: string
           offer_id?: string | null
           phone?: string | null
@@ -1084,6 +1086,7 @@ export type Database = {
           id?: string
           is_processed?: boolean | null
           message?: string | null
+          admin_reply?: string | null
           name?: string
           offer_id?: string | null
           phone?: string | null

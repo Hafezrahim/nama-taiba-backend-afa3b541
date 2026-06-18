@@ -156,9 +156,9 @@ const TopHeader = () => {
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem asChild>
-                    <Link to="/profile" className={`flex items-center gap-2 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <User className="h-4 w-4" />
-                      <span>{t('Profile', 'الملف الشخصي')}</span>
+                    <Link to="/client" className={`flex items-center gap-2 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>{t('Client Dashboard', 'لوحة تحكم العميل')}</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />

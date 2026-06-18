@@ -45,33 +45,56 @@ interface ActivityLogEntry {
   target_name?: string;
 }
 
-// All available admin pages for permission assignment
+// All available admin pages — grouped by category to match sidebar
 const ADMIN_PAGES = [
-  { path: '/admin', labelEn: 'Dashboard', labelAr: 'لوحة التحكم' },
-  { path: '/admin/products', labelEn: 'Products', labelAr: 'المنتجات' },
-  { path: '/admin/categories', labelEn: 'Categories', labelAr: 'الفئات' },
-  { path: '/admin/orders', labelEn: 'Orders', labelAr: 'الطلبات' },
-  { path: '/admin/offers', labelEn: 'Offers', labelAr: 'العروض' },
-  { path: '/admin/users', labelEn: 'Users', labelAr: 'المستخدمين' },
-  { path: '/admin/roles', labelEn: 'Roles & Permissions', labelAr: 'الأدوار والصلاحيات' },
-  { path: '/admin/blogs', labelEn: 'Blogs', labelAr: 'المدونات' },
-  { path: '/admin/projects', labelEn: 'Projects', labelAr: 'المشاريع' },
-  { path: '/admin/services', labelEn: 'Services', labelAr: 'الخدمات' },
-  { path: '/admin/testimonials', labelEn: 'Testimonials', labelAr: 'الشهادات' },
-  { path: '/admin/about', labelEn: 'About Info', labelAr: 'معلومات عنا' },
-  { path: '/admin/team', labelEn: 'Team Members', labelAr: 'أعضاء الفريق' },
-  { path: '/admin/certifications', labelEn: 'Certifications', labelAr: 'الشهادات' },
-  { path: '/admin/partners', labelEn: 'Partners', labelAr: 'الشركاء' },
-  { path: '/admin/contacts', labelEn: 'Contact Submissions', labelAr: 'رسائل التواصل' },
-  { path: '/admin/quotes', labelEn: 'Quote Requests', labelAr: 'طلبات الأسعار' },
-  { path: '/admin/marketers', labelEn: 'Marketer Applications', labelAr: 'طلبات المسوقين' },
-  { path: '/admin/chatbot', labelEn: 'Chatbot FAQs', labelAr: 'أسئلة الشات بوت' },
-  { path: '/admin/cities', labelEn: 'Cities', labelAr: 'المدن' },
-  { path: '/admin/districts', labelEn: 'Districts & Shipping', labelAr: 'الأحياء والشحن' },
-  { path: '/admin/settings', labelEn: 'Settings', labelAr: 'الإعدادات' },
-  { path: '/admin/slider', labelEn: 'Slider', labelAr: 'الشريط المتحرك' },
-  { path: '/admin/backup', labelEn: 'Backup & Restore', labelAr: 'النسخ الاحتياطي' },
+  // Overview
+  { path: '/admin',               labelEn: 'Dashboard',               labelAr: 'لوحة التحكم',          group: 'Overview' },
+  // E-Commerce / Operations
+  { path: '/admin/products',      labelEn: 'Products',                labelAr: 'المنتجات',             group: 'E-Commerce' },
+  { path: '/admin/categories',    labelEn: 'Categories',              labelAr: 'الفئات',               group: 'E-Commerce' },
+  { path: '/admin/orders',        labelEn: 'Orders',                  labelAr: 'الطلبات',              group: 'E-Commerce' },
+  { path: '/admin/offers',        labelEn: 'Offers',                  labelAr: 'العروض',               group: 'E-Commerce' },
+  // Logistics
+  { path: '/admin/shipments',     labelEn: 'Shipments',               labelAr: 'الشحنات',              group: 'Logistics' },
+  { path: '/admin/deliverers',    labelEn: 'Deliverers',              labelAr: 'المناديب',             group: 'Logistics' },
+  { path: '/admin/map-locations', labelEn: 'Map Locations',           labelAr: 'مواقع الخريطة',        group: 'Logistics' },
+  { path: '/admin/cities',        labelEn: 'Cities',                  labelAr: 'المدن',                group: 'Logistics' },
+  { path: '/admin/districts',     labelEn: 'Districts & Shipping',    labelAr: 'الأحياء والشحن',       group: 'Logistics' },
+  // Communications / CRM
+  { path: '/admin/quotes',        labelEn: 'Quote Requests',          labelAr: 'طلبات الأسعار',        group: 'Communications' },
+  { path: '/admin/contacts',      labelEn: 'Contact Submissions',     labelAr: 'رسائل التواصل',        group: 'Communications' },
+  { path: '/admin/tickets',       labelEn: 'Support Tickets',         labelAr: 'تذاكر الدعم',          group: 'Communications' },
+  { path: '/admin/marketers',     labelEn: 'Marketer Applications',   labelAr: 'طلبات المسوقين',       group: 'Communications' },
+  { path: '/admin/chatbot',       labelEn: 'Chatbot FAQs',            labelAr: 'أسئلة الشات بوت',      group: 'Communications' },
+  // Content
+  { path: '/admin/blogs',         labelEn: 'Blogs',                   labelAr: 'المدونات',             group: 'Content' },
+  { path: '/admin/projects',      labelEn: 'Projects',                labelAr: 'المشاريع',             group: 'Content' },
+  { path: '/admin/services',      labelEn: 'Services',                labelAr: 'الخدمات',              group: 'Content' },
+  { path: '/admin/testimonials',  labelEn: 'Testimonials',            labelAr: 'الشهادات',             group: 'Content' },
+  { path: '/admin/slider',        labelEn: 'Slider',                  labelAr: 'الشريط المتحرك',       group: 'Content' },
+  // Company
+  { path: '/admin/about',         labelEn: 'About Info',              labelAr: 'معلومات عنا',          group: 'Company' },
+  { path: '/admin/team',          labelEn: 'Team Members',            labelAr: 'أعضاء الفريق',         group: 'Company' },
+  { path: '/admin/certifications',labelEn: 'Certifications',          labelAr: 'الشهادات',             group: 'Company' },
+  { path: '/admin/partners',      labelEn: 'Partners',                labelAr: 'الشركاء',              group: 'Company' },
+  // User Management
+  { path: '/admin/users',         labelEn: 'Users Management',        labelAr: 'إدارة المستخدمين',     group: 'User Management' },
+  { path: '/admin/roles',         labelEn: 'Roles & Permissions',     labelAr: 'الأدوار والصلاحيات',   group: 'User Management' },
+  // System
+  { path: '/admin/settings',      labelEn: 'Settings',                labelAr: 'الإعدادات',            group: 'System' },
+  { path: '/admin/seo',           labelEn: 'SEO & Analytics',         labelAr: 'السيو والتحليلات',     group: 'System' },
+  { path: '/admin/backup',        labelEn: 'Backup & Restore',        labelAr: 'النسخ الاحتياطي',      group: 'System' },
+  { path: '/admin/security',      labelEn: 'Security',                labelAr: 'الأمان',               group: 'System' },
+  { path: '/admin/contact-info',  labelEn: 'Contact Info',            labelAr: 'معلومات التواصل',      group: 'System' },
 ];
+
+// Group ADMIN_PAGES by category for grouped rendering in checkboxes
+const GROUPED_PAGES = ADMIN_PAGES.reduce((acc, page) => {
+  if (!acc[page.group]) acc[page.group] = [];
+  acc[page.group].push(page);
+  return acc;
+}, {} as Record<string, typeof ADMIN_PAGES>);
+
 
 const ACTION_LABELS: Record<string, { en: string; ar: string; color: string }> = {
   create_user: { en: 'Created User', ar: 'إنشاء مستخدم', color: 'bg-green-500' },
@@ -190,7 +213,7 @@ export default function AdminUsers() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      
+
       const { data: rolesData, error: rolesError } = await supabase
         .from('user_roles')
         .select('*')
@@ -199,7 +222,7 @@ export default function AdminUsers() {
       if (rolesError) throw rolesError;
 
       const userIds = [...new Set((rolesData || []).map(r => r.user_id))];
-      
+
       const { data: profiles } = await supabase
         .from('profiles')
         .select('id, full_name_en, full_name_ar, phone, avatar_url')
@@ -285,9 +308,9 @@ export default function AdminUsers() {
       const targetUser = users.find(u => u.id === id);
       const { error } = await supabase
         .from('user_roles')
-        .update({ 
+        .update({
           is_approved: approved,
-          approved_at: approved ? new Date().toISOString() : null 
+          approved_at: approved ? new Date().toISOString() : null
         })
         .eq('id', id);
 
@@ -348,7 +371,7 @@ export default function AdminUsers() {
       const { error: roleError } = await supabase.from('user_roles').delete().eq('id', id);
       if (roleError) throw roleError;
       await supabase.from('profiles').delete().eq('id', userId);
-      
+
       toast.success(t('User deleted successfully', 'تم حذف المستخدم بنجاح'));
       fetchUsers();
     } catch (error: any) {
@@ -367,7 +390,7 @@ export default function AdminUsers() {
     setSavingPerms(true);
     try {
       await supabase.from('user_page_permissions').delete().eq('user_id', editingUser.user_id);
-      
+
       if (editPages.length > 0) {
         const rows = editPages.map(page => ({
           user_id: editingUser.user_id,
@@ -484,7 +507,7 @@ export default function AdminUsers() {
   });
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
-  const paginatedUsers = useMemo(() => 
+  const paginatedUsers = useMemo(() =>
     filteredUsers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE),
     [filteredUsers, currentPage]
   );
@@ -497,18 +520,45 @@ export default function AdminUsers() {
   const adminUsers = users.filter(u => u.role === 'admin').length;
 
   const PageCheckboxList = ({ selectedPages, onToggle }: { selectedPages: string[]; onToggle: (p: string) => void }) => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-64 overflow-y-auto border rounded-lg p-3">
-      {ADMIN_PAGES.map(page => (
-        <label key={page.path} className="flex items-center gap-2 p-1.5 rounded hover:bg-muted cursor-pointer text-sm">
-          <Checkbox
-            checked={selectedPages.includes(page.path)}
-            onCheckedChange={() => onToggle(page.path)}
-          />
-          <span>{isRTL ? page.labelAr : page.labelEn}</span>
-        </label>
-      ))}
+    <div className="space-y-4 max-h-72 overflow-y-auto border rounded-lg p-3">
+      {Object.entries(GROUPED_PAGES).map(([groupName, pages]) => {
+        const allSelected = pages.every(p => selectedPages.includes(p.path));
+        const someSelected = pages.some(p => selectedPages.includes(p.path));
+        return (
+          <div key={groupName}>
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{groupName}</span>
+              <button
+                type="button"
+                className="text-[11px] text-primary hover:underline"
+                onClick={() => {
+                  if (allSelected) {
+                    pages.forEach(p => selectedPages.includes(p.path) && onToggle(p.path));
+                  } else {
+                    pages.forEach(p => !selectedPages.includes(p.path) && onToggle(p.path));
+                  }
+                }}
+              >
+                {allSelected ? t('Deselect All', 'إلغاء الكل') : t('Select All', 'تحديد الكل')}
+              </button>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 ps-1 border-s-2 ms-1" style={{ borderColor: allSelected ? 'hsl(var(--primary))' : someSelected ? 'hsl(var(--primary)/40%)' : 'hsl(var(--border))' }}>
+              {pages.map(page => (
+                <label key={page.path} className="flex items-center gap-2 p-1.5 rounded hover:bg-muted cursor-pointer text-sm">
+                  <Checkbox
+                    checked={selectedPages.includes(page.path)}
+                    onCheckedChange={() => onToggle(page.path)}
+                  />
+                  <span>{isRTL ? page.labelAr : page.labelEn}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
+
 
   const formatLogTime = (dateStr: string) => {
     const date = new Date(dateStr);
@@ -566,7 +616,7 @@ export default function AdminUsers() {
                     <Input
                       value={newUser.full_name_en}
                       onChange={e => setNewUser(p => ({ ...p, full_name_en: e.target.value }))}
-                      placeholder="John Doe"
+                      placeholder="hafez Rahim"
                     />
                   </div>
                   <div className="space-y-2">
@@ -574,7 +624,7 @@ export default function AdminUsers() {
                     <Input
                       value={newUser.full_name_ar}
                       onChange={e => setNewUser(p => ({ ...p, full_name_ar: e.target.value }))}
-                      placeholder="جون دو"
+                      placeholder="حافظ رحیم"
                       dir="rtl"
                     />
                   </div>
@@ -614,8 +664,8 @@ export default function AdminUsers() {
                 <div className="space-y-2">
                   <Label>{t('Allowed Admin Pages', 'صفحات الإدارة المسموحة')}</Label>
                   <p className="text-xs text-muted-foreground">
-                    {t('Select which admin pages this user can access. Admins have full access regardless.', 
-                       'حدد صفحات لوحة التحكم التي يمكن لهذا المستخدم الوصول إليها. المسؤولون لديهم صلاحيات كاملة.')}
+                    {t('Select which admin pages this user can access. Admins have full access regardless.',
+                      'حدد صفحات لوحة التحكم التي يمكن لهذا المستخدم الوصول إليها. المسؤولون لديهم صلاحيات كاملة.')}
                   </p>
                   <div className="flex gap-2 mb-2">
                     <Button type="button" variant="outline" size="sm" onClick={() => setNewUser(p => ({ ...p, allowed_pages: ADMIN_PAGES.map(pg => pg.path) }))}>
@@ -814,8 +864,8 @@ export default function AdminUsers() {
                     <TableCell>
                       <div className="flex flex-col">
                         <span className="font-medium">
-                          {(isRTL ? user.profile?.full_name_ar : user.profile?.full_name_en) || 
-                           t('Unnamed User', 'مستخدم بدون اسم')}
+                          {(isRTL ? user.profile?.full_name_ar : user.profile?.full_name_en) ||
+                            t('Unnamed User', 'مستخدم بدون اسم')}
                         </span>
                         <span className="text-xs text-muted-foreground">
                           {user.user_id.substring(0, 8)}...
@@ -828,10 +878,10 @@ export default function AdminUsers() {
                         <SelectTrigger className="w-28">
                           <SelectValue>
                             <Badge variant={getRoleBadgeVariant(user.role)}>
-                              {t(user.role.charAt(0).toUpperCase() + user.role.slice(1), 
-                                user.role === 'admin' ? 'مسؤول' : 
-                                user.role === 'client' ? 'عميل' : 
-                                user.role === 'marketer' ? 'مسوق' : 'مستخدم')}
+                              {t(user.role.charAt(0).toUpperCase() + user.role.slice(1),
+                                user.role === 'admin' ? 'مسؤول' :
+                                  user.role === 'client' ? 'عميل' :
+                                    user.role === 'marketer' ? 'مسوق' : 'مستخدم')}
                             </Badge>
                           </SelectValue>
                         </SelectTrigger>
@@ -960,8 +1010,8 @@ export default function AdminUsers() {
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">
-            {t('This will replace existing permissions for all selected users.', 
-               'سيتم استبدال الصلاحيات الحالية لجميع المستخدمين المحددين.')}
+            {t('This will replace existing permissions for all selected users.',
+              'سيتم استبدال الصلاحيات الحالية لجميع المستخدمين المحددين.')}
           </p>
           <div className="space-y-3">
             <div className="flex gap-2">
