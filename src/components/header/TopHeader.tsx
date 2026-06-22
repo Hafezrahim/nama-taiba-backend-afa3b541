@@ -100,7 +100,7 @@ const TopHeader = () => {
               <div className="relative">
                 <ShoppingCart className="h-4 w-4" />
                 {getCartCount() > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-nama-orange text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                  <span className="absolute -top-2 -right-2 bg-green-700 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                     {getCartCount()}
                   </span>
                 )}
@@ -115,7 +115,7 @@ const TopHeader = () => {
               <div className="relative">
                 <Heart className="h-4 w-4" />
                 {wishlistItems.length > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-nama-orange text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                  <span className="absolute -top-2 -right-2 bg-green-700 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
                     {wishlistItems.length}
                   </span>
                 )}

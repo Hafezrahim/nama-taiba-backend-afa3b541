@@ -29,7 +29,7 @@ const UserActions = ({ toggleMobileMenu }: UserActionsProps) => {
       <Link to="/wishlist" className="sm:hidden">
         <Button variant="ghost" size="icon" className="relative text-white hover:text-white hover:bg-white/10">
           <Heart className="h-5 w-5" />
-          <span className="absolute -top-1 -right-1 bg-nama-orange text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+          <span className="absolute -top-1 -right-1 bg-green-700 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
             {wishlistItems.length}
           </span>
         </Button>

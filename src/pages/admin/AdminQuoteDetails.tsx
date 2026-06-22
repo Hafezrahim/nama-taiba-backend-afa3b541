@@ -27,7 +27,41 @@ interface QuoteRequest {
 
 // Parse the structured message
 const parseMessage = (message: string | undefined | null) => {
-  if (!message) return { items: [], location: '', notes: '' };
+  if (!message) return { items: [], location: '', notes: '', marketerDetails: null, isJson: false };
+
+  // Try to parse as JSON (for marketer quotes)
+  try {
+    const parsed = JSON.parse(message);
+    if (parsed && typeof parsed === 'object') {
+      const items = Array.isArray(parsed.items) 
+        ? parsed.items.map((item: any) => ({
+            name: item.productNameAr || item.productNameEn || 'Unknown Product',
+            nameAr: item.productNameAr,
+            nameEn: item.productNameEn,
+            quantity: item.quantity?.toString() || ''
+          }))
+        : [];
+      
+      const locationParts = [parsed.city, parsed.district, parsed.street].filter(Boolean);
+      const location = locationParts.join(', ');
+
+      return {
+        items,
+        location,
+        notes: parsed.needDelivery ? 'Delivery requested by client.' : 'No delivery requested.',
+        marketerDetails: {
+          city: parsed.city || '',
+          district: parsed.district || '',
+          street: parsed.street || '',
+          needDelivery: parsed.needDelivery || false
+        },
+        raw: message,
+        isJson: true
+      };
+    }
+  } catch (e) {
+    // Not a valid JSON, continue to regex parsing
+  }
 
   const itemsMatch = message.match(/ITEMS REQUESTED:\n([\s\S]*?)\n\nDELIVERY/);
   const locationMatch = message.match(/DELIVERY LOCATION:\s*(.*)/);
@@ -58,6 +92,8 @@ const parseMessage = (message: string | undefined | null) => {
     location: locationMatch ? locationMatch[1].trim() : '',
     notes: notesMatch ? notesMatch[1].trim() : '',
     raw: message,
+    isJson: false,
+    marketerDetails: null
   };
 };
 
@@ -86,7 +122,24 @@ export default function AdminQuoteDetails() {
         .single();
 
       if (error) throw error;
-      setQuote(data);
+      
+      let fetchedCompany = data.company;
+      if (data.company?.startsWith('marketer:')) {
+        const marketerId = data.company.replace('marketer:', '');
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name_en, full_name_ar')
+          .eq('id', marketerId)
+          .maybeSingle();
+          
+        if (profile) {
+          fetchedCompany = isRTL 
+            ? (profile.full_name_ar || profile.full_name_en || data.company)
+            : (profile.full_name_en || profile.full_name_ar || data.company);
+        }
+      }
+      
+      setQuote({ ...data, company: fetchedCompany });
       
       const parsedReq = parseMessage(data.message);
       
@@ -105,7 +158,7 @@ export default function AdminQuoteDetails() {
       }
       
       // Initialize items from request if no structured reply exists
-      setReplyItems(parsedReq.items.map(item => ({
+      setReplyItems(parsedReq.items.map((item: any) => ({
         ...item,
         price: '',
         notes: ''
@@ -323,7 +376,7 @@ export default function AdminQuoteDetails() {
                         {parsed.items.map((item, idx) => (
                           <tr key={idx} className="hover:bg-muted/20 transition-colors">
                             <td className="px-4 py-3 text-center font-medium text-muted-foreground">{idx + 1}</td>
-                            <td className="px-4 py-3 font-medium">{item.name}</td>
+                            <td className="px-4 py-3 font-medium">{isRTL && (item as any).nameAr ? (item as any).nameAr : (!isRTL && (item as any).nameEn ? (item as any).nameEn : item.name)}</td>
                             <td className="px-4 py-3 text-end font-semibold text-primary">{item.quantity || '-'}</td>
                           </tr>
                         ))}
@@ -393,12 +446,21 @@ export default function AdminQuoteDetails() {
                           <th className="px-4 py-3 text-start w-24">{t('Qty', 'الكمية')}</th>
                           <th className="px-4 py-3 text-start w-32">{t('Unit Price', 'سعر الوحدة')}</th>
                           <th className="px-4 py-3 text-start min-w-[200px]">{t('Notes', 'ملاحظات')}</th>
+                          {(() => { try { const r = JSON.parse(quote.admin_reply || '{}'); return r.marketer_replied; } catch { return false; } })() && (
+                            <th className="px-4 py-3 text-center w-32">{t('Marketer', 'المسوق')}</th>
+                          )}
                         </tr>
                       </thead>
                       <tbody className="divide-y">
-                        {replyItems.map((item, idx) => (
-                          <tr key={idx} className="hover:bg-muted/10 transition-colors">
-                            <td className="px-4 py-3 font-medium text-xs">{item.name}</td>
+                        {replyItems.map((item, idx) => {
+                          let marketerReplied = false;
+                          try { const r = JSON.parse(quote.admin_reply || '{}'); marketerReplied = r.marketer_replied; } catch {}
+                          return (
+                          <tr key={idx} className={`hover:bg-muted/10 transition-colors ${
+                            item.marketer_decision === 'accepted' ? 'bg-green-50' :
+                            item.marketer_decision === 'rejected' ? 'bg-red-50' : ''
+                          }`}>
+                            <td className="px-4 py-3 font-medium text-xs">{isRTL && (item as any).nameAr ? (item as any).nameAr : (!isRTL && (item as any).nameEn ? (item as any).nameEn : item.name)}</td>
                             <td className="px-4 py-3 text-muted-foreground text-xs">{item.quantity || '-'}</td>
                             <td className="px-4 py-3">
                               <Input 
@@ -426,8 +488,26 @@ export default function AdminQuoteDetails() {
                                 }}
                               />
                             </td>
+                            {marketerReplied && (
+                              <td className="px-4 py-3 text-center">
+                                {item.marketer_decision === 'accepted' ? (
+                                  <span className="inline-flex items-center gap-1 text-green-600 font-medium text-xs">
+                                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
+                                    {t('Accepted', 'مقبول')}
+                                  </span>
+                                ) : item.marketer_decision === 'rejected' ? (
+                                  <span className="inline-flex items-center gap-1 text-red-500 font-medium text-xs">
+                                    <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                                    {t('Rejected', 'مرفوض')}
+                                  </span>
+                                ) : (
+                                  <span className="text-muted-foreground text-xs">{t('No decision', 'لا قرار')}</span>
+                                )}
+                              </td>
+                            )}
                           </tr>
-                        ))}
+                        );
+                        })}
                       </tbody>
                     </table>
                   </div>

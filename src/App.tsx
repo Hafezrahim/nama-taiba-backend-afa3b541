@@ -87,6 +87,14 @@ const AdminShipments = lazy(() => import('./pages/admin/AdminShipments'));
 const AdminSecurity = lazy(() => import('./pages/admin/AdminSecurity'));
 const AdminMapLocations = lazy(() => import('./pages/admin/AdminMapLocations'));
 
+// Lazy-loaded marketer pages
+const MarketerLayout = lazy(() => import('./components/marketer/MarketerLayout').then(m => ({ default: m.MarketerLayout })));
+const MarketerDashboard = lazy(() => import('./pages/marketer/MarketerDashboard'));
+const MarketerQuotations = lazy(() => import('./pages/marketer/MarketerQuotations'));
+const MarketerConfirmed = lazy(() => import('./pages/marketer/MarketerConfirmed'));
+const MarketerQuoteDetails = lazy(() => import('./pages/marketer/MarketerQuoteDetails'));
+const MarketerProfile = lazy(() => import('./pages/marketer/MarketerProfile'));
+
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center">
     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -176,6 +184,15 @@ function App() {
                         <Route path="deliverers/:id" element={<AdminDelivererDetails />} />
                         <Route path="shipments" element={<AdminShipments />} />
                         <Route path="security" element={<AdminSecurity />} />
+                      </Route>
+                      
+                      {/* Marketer Routes */}
+                      <Route path="/marketer" element={<MarketerLayout />}>
+                        <Route index element={<MarketerDashboard />} />
+                        <Route path="quotations" element={<MarketerQuotations />} />
+                        <Route path="confirmed" element={<MarketerConfirmed />} />
+                        <Route path="quotes/:id" element={<MarketerQuoteDetails />} />
+                        <Route path="profile" element={<MarketerProfile />} />
                       </Route>
                       
                       <Route path="*" element={<NotFound />} />

@@ -26,7 +26,7 @@ const Login = () => {
   const { t, isRTL } = useLanguage();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { user, isAdmin, isApproved, loading: authLoading, signOut, allowedPages } = useAuth();
+  const { user, isAdmin, isApproved, loading: authLoading, signOut, allowedPages, userRole } = useAuth();
   
   const [email, setEmail] = useState(() => localStorage.getItem('rememberedEmail') || '');
   const [password, setPassword] = useState('');
@@ -40,13 +40,17 @@ const Login = () => {
     if (!authLoading && user) {
       if (isAdmin) {
         navigate('/admin');
+      } else if (userRole === 'marketer' && isApproved) {
+        navigate('/marketer');
+      } else if (userRole === 'client' && isApproved) {
+        navigate('/client');
       } else if (isApproved && allowedPages.length > 0) {
         navigate(allowedPages[0]);
       } else if (isApproved) {
         navigate('/');
       }
     }
-  }, [user, isAdmin, isApproved, authLoading, navigate, allowedPages]);
+  }, [user, isAdmin, isApproved, authLoading, navigate, allowedPages, userRole]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,6 +92,10 @@ const Login = () => {
 
       if (roleData.role === 'admin') {
         navigate('/admin');
+      } else if (roleData.role === 'marketer' && roleData.is_approved) {
+        navigate('/marketer');
+      } else if (roleData.role === 'client' && roleData.is_approved) {
+        navigate('/client');
       } else if (roleData.is_approved === true) {
         const { data: perms } = await supabase
           .from('user_page_permissions')
