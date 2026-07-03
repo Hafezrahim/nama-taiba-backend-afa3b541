@@ -113,17 +113,9 @@ const Index = () => {
                     id: l.id,
                     latitude: l.latitude,
                     longitude: l.longitude,
-                    title: isRTL ? l.name_ar : l.name_en,
+                    title: getLocationTitle(l, isRTL),
                     iconColor: l.icon_color || '#630d5f',
-                    popupHtml: `
-                      <div style="min-width:200px;font-family:inherit">
-                        <div style="font-weight:700;font-size:14px;margin-bottom:4px">${isRTL ? l.name_ar : l.name_en}</div>
-                        ${(isRTL ? l.address_ar : l.address_en) ? `<div style="font-size:12px;color:#555;margin-bottom:6px">${isRTL ? l.address_ar : l.address_en}</div>` : ''}
-                        ${l.phone ? `<div style="font-size:12px">📞 <a href="tel:${l.phone}">${l.phone}</a></div>` : ''}
-                        ${l.email ? `<div style="font-size:12px">✉️ <a href="mailto:${l.email}">${l.email}</a></div>` : ''}
-                        ${l.whatsapp ? `<div style="font-size:12px">💬 <a href="https://wa.me/${l.whatsapp.replace(/\\D/g,'')}" target="_blank">WhatsApp</a></div>` : ''}
-                        ${l.map_url ? `<div style="font-size:12px;margin-top:4px"><a href="${l.map_url}" target="_blank">${isRTL ? 'الاتجاهات ↗' : 'Directions ↗'}</a></div>` : ''}
-                      </div>`
+                    popupHtml: buildLocationPopup(l, isRTL),
                   }))}
                   zoom={6}
                   fitBounds
