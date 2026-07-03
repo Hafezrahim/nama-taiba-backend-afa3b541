@@ -1052,13 +1052,13 @@ export type Database = {
       }
       quote_requests: {
         Row: {
+          admin_reply: string | null
           company: string | null
           created_at: string | null
           email: string
           id: string
           is_processed: boolean | null
           message: string | null
-          admin_reply: string | null
           name: string
           offer_id: string | null
           phone: string | null
@@ -1066,13 +1066,13 @@ export type Database = {
           quantity: number | null
         }
         Insert: {
+          admin_reply?: string | null
           company?: string | null
           created_at?: string | null
           email: string
           id?: string
           is_processed?: boolean | null
           message?: string | null
-          admin_reply?: string | null
           name: string
           offer_id?: string | null
           phone?: string | null
@@ -1080,13 +1080,13 @@ export type Database = {
           quantity?: number | null
         }
         Update: {
+          admin_reply?: string | null
           company?: string | null
           created_at?: string | null
           email?: string
           id?: string
           is_processed?: boolean | null
           message?: string | null
-          admin_reply?: string | null
           name?: string
           offer_id?: string | null
           phone?: string | null
