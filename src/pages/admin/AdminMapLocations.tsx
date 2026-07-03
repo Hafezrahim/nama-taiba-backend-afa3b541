@@ -121,9 +121,7 @@ const AdminMapLocations = () => {
       longitude: i.longitude,
       title: isRTL ? i.name_ar : i.name_en,
       iconColor: i.icon_color || '#630d5f',
-      popupHtml: `<b>${isRTL ? i.name_ar : i.name_en}</b><br/>${
-        (isRTL ? i.address_ar : i.address_en) || ''
-      }`,
+      popupHtml: buildLocationPopup(i, isRTL),
     }));
 
   return (
