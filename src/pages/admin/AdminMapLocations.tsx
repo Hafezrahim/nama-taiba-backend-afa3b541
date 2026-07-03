@@ -13,6 +13,17 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { buildLocationPopup } from '@/lib/mapPopup';
+import {
   Table,
   TableBody,
   TableCell,
@@ -53,6 +64,7 @@ const AdminMapLocations = () => {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Partial<MapLocation>>(empty);
+  const [deleteTarget, setDeleteTarget] = useState<MapLocation | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -89,14 +101,15 @@ const AdminMapLocations = () => {
     }
   };
 
-  const remove = async (id: string) => {
-    if (!confirm(t('Delete this location?', 'حذف هذا الموقع؟'))) return;
+  const remove = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteMapLocation(id);
+      await deleteMapLocation(deleteTarget.id);
       toast.success(t('Deleted', 'تم الحذف'));
+      setDeleteTarget(null);
       load();
     } catch (e: any) {
-      toast.error(e.message);
+      toast.error(e.message || t('Failed to delete', 'فشل الحذف'));
     }
   };
 
@@ -108,9 +121,7 @@ const AdminMapLocations = () => {
       longitude: i.longitude,
       title: isRTL ? i.name_ar : i.name_en,
       iconColor: i.icon_color || '#630d5f',
-      popupHtml: `<b>${isRTL ? i.name_ar : i.name_en}</b><br/>${
-        (isRTL ? i.address_ar : i.address_en) || ''
-      }`,
+      popupHtml: buildLocationPopup(i, isRTL),
     }));
 
   return (
@@ -173,7 +184,7 @@ const AdminMapLocations = () => {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => remove(i.id)}
+                        onClick={() => setDeleteTarget(i)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -313,6 +324,26 @@ const AdminMapLocations = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Delete location?', 'حذف الموقع؟')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                `This will permanently remove "${deleteTarget ? (isRTL ? deleteTarget.name_ar : deleteTarget.name_en) : ''}" from the map.`,
+                `سيتم حذف "${deleteTarget ? (isRTL ? deleteTarget.name_ar : deleteTarget.name_en) : ''}" نهائيًا من الخريطة.`
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('Cancel', 'إلغاء')}</AlertDialogCancel>
+            <AlertDialogAction onClick={remove} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {t('Delete', 'حذف')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
