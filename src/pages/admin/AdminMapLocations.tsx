@@ -184,7 +184,7 @@ const AdminMapLocations = () => {
                       <Button
                         variant="destructive"
                         size="sm"
-                        onClick={() => remove(i.id)}
+                        onClick={() => setDeleteTarget(i)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
