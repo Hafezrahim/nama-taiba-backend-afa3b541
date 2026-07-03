@@ -106,7 +106,7 @@ export default function AdminQuoteDetails() {
   
   // Structured reply state
   const [replyNote, setReplyNote] = useState('');
-  const [replyItems, setReplyItems] = useState<{name: string, quantity: string, price: string, notes: string}[]>([]);
+  const [replyItems, setReplyItems] = useState<{name: string, quantity: string, price: string, notes: string, marketer_decision?: string}[]>([]);
   const [isSendingReply, setIsSendingReply] = useState(false);
 
   useEffect(() => {
