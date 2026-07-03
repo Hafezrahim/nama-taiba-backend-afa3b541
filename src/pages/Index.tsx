@@ -25,6 +25,7 @@ import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 import { getMapLocations, type MapLocation } from '@/backend/mapLocations';
+import { buildLocationPopup, getLocationTitle } from '@/lib/mapPopup';
 
 const Index = () => {
   const {
