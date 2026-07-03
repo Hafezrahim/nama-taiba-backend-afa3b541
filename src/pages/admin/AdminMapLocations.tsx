@@ -64,6 +64,7 @@ const AdminMapLocations = () => {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Partial<MapLocation>>(empty);
+  const [deleteTarget, setDeleteTarget] = useState<MapLocation | null>(null);
 
   const load = async () => {
     setLoading(true);
