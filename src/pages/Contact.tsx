@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { getContactInfo, ContactInfo } from '../backend/contact';
 import { getMapLocations, type MapLocation } from '@/backend/mapLocations';
+import { buildLocationPopup, getLocationTitle } from '@/lib/mapPopup';
 import { MessageSquare, Phone, Mail, MapPin } from 'lucide-react';
 import LeafletMap from '@/components/ui/leaflet-map';
 import SEO from '@/components/SEO';
