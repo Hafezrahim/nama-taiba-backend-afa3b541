@@ -324,6 +324,26 @@ const AdminMapLocations = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('Delete location?', 'حذف الموقع؟')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                `This will permanently remove "${deleteTarget ? (isRTL ? deleteTarget.name_ar : deleteTarget.name_en) : ''}" from the map.`,
+                `سيتم حذف "${deleteTarget ? (isRTL ? deleteTarget.name_ar : deleteTarget.name_en) : ''}" نهائيًا من الخريطة.`
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('Cancel', 'إلغاء')}</AlertDialogCancel>
+            <AlertDialogAction onClick={remove} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {t('Delete', 'حذف')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
