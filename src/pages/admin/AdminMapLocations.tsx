@@ -101,14 +101,15 @@ const AdminMapLocations = () => {
     }
   };
 
-  const remove = async (id: string) => {
-    if (!confirm(t('Delete this location?', 'حذف هذا الموقع؟'))) return;
+  const remove = async () => {
+    if (!deleteTarget) return;
     try {
-      await deleteMapLocation(id);
+      await deleteMapLocation(deleteTarget.id);
       toast.success(t('Deleted', 'تم الحذف'));
+      setDeleteTarget(null);
       load();
     } catch (e: any) {
-      toast.error(e.message);
+      toast.error(e.message || t('Failed to delete', 'فشل الحذف'));
     }
   };
 
