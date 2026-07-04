@@ -106,8 +106,19 @@ const LeafletMap = ({
     const latLngs: L.LatLngTuple[] = [];
     effectiveMarkers.forEach((m) => {
       const icon = buildColoredIcon(m.iconColor || '#630d5f');
-      const marker = L.marker([m.latitude, m.longitude], { icon, title: m.title }).addTo(layer);
-      if (m.popupHtml) marker.bindPopup(m.popupHtml);
+      const marker = L.marker([m.latitude, m.longitude], {
+        icon,
+        title: m.title,
+        alt: m.title ? `Map marker: ${m.title}` : 'Map marker',
+        keyboard: true,
+      }).addTo(layer);
+      if (m.popupHtml) {
+        marker.bindPopup(m.popupHtml);
+        marker.on('popupopen', (e: any) => {
+          const el = e.popup?.getElement()?.querySelector('[role="dialog"]') as HTMLElement | null;
+          if (el) setTimeout(() => el.focus(), 0);
+        });
+      }
       if (m.title) marker.bindTooltip(m.title, { direction: 'top', offset: [0, -36] });
       latLngs.push([m.latitude, m.longitude]);
     });
