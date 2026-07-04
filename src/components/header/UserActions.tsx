@@ -112,14 +112,7 @@ const UserActions = ({ toggleMobileMenu }: UserActionsProps) => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-      ) : (
-        <Link to="/login" className="hidden md:block">
-          <Button variant="ghost" className={`flex items-center gap-2 text-white hover:text-white hover:bg-white/10 ${isRTL ? 'flex-row-reverse' : ''}`}>
-            <LogIn className="h-5 w-5" />
-            <span>{t('Sign In', 'تسجيل الدخول')}</span>
-          </Button>
-        </Link>
-      )}
+      ) : null}
 
       {/* Language Switcher - only visible on mobile, hidden on desktop since it's in TopHeader */}
       <Button
