@@ -123,63 +123,7 @@ const TopHeader = () => {
               <span>{t('Wishlist', 'المفضلة')}</span>
             </Link>
 
-            {/* User Menu / Login Button */}
-            {user ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <button className={`flex items-center gap-2 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}>
-                    {userProfile?.avatar_url ? (
-                      <Avatar className="h-5 w-5">
-                        <AvatarImage src={userProfile.avatar_url} />
-                        <AvatarFallback className="text-[10px] bg-primary text-primary-foreground">
-                          {user.email?.charAt(0).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                    ) : (
-                      <User className="h-4 w-4" />
-                    )}
-                    <span>{user.email?.split('@')[0] || t('Account', 'الحساب')}</span>
-                    <ChevronDown className="h-3 w-3" />
-                  </button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align={isRTL ? 'start' : 'end'} className="w-48 bg-popover text-popover-foreground">
-                  <DropdownMenuLabel className="text-foreground">
-                    {t('My Account', 'حسابي')}
-                  </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  {isAdmin && (
-                    <DropdownMenuItem asChild>
-                      <Link to="/admin" className={`flex items-center gap-2 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <LayoutDashboard className="h-4 w-4" />
-                        <span>{t('Admin Dashboard', 'لوحة التحكم')}</span>
-                      </Link>
-                    </DropdownMenuItem>
-                  )}
-                  <DropdownMenuItem asChild>
-                    <Link to="/client" className={`flex items-center gap-2 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
-                      <LayoutDashboard className="h-4 w-4" />
-                      <span>{t('Client Dashboard', 'لوحة تحكم العميل')}</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem 
-                    onClick={() => supabase.auth.signOut()}
-                    className={`flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 ${isRTL ? 'flex-row-reverse' : ''}`}
-                  >
-                    <LogOut className="h-4 w-4" />
-                    <span>{t('Logout', 'تسجيل الخروج')}</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link 
-                to="/login" 
-                className={`flex items-center gap-2 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
-              >
-                <LogIn className="h-4 w-4" />
-                <span>{t('Login', 'تسجيل الدخول')}</span>
-              </Link>
-            )}
+            {/* Sign in / user menu moved to main header (UserActions) */}
 
             {/* Language Switcher */}
             <button 
