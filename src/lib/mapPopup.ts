@@ -11,19 +11,26 @@ export const buildLocationPopup = (l: MapLocation, isRTL: boolean): string => {
   const waFallback = isRTL ? 'لا يوجد واتساب' : 'No WhatsApp available';
   const directions = isRTL ? 'الاتجاهات ↗' : 'Directions ↗';
 
+  const labelCall = isRTL ? 'اتصل على' : 'Call';
+  const labelEmail = isRTL ? 'أرسل بريدًا إلى' : 'Email';
+  const labelWa = isRTL ? 'واتساب' : 'WhatsApp';
+  const labelDir = isRTL ? 'افتح الاتجاهات إلى' : 'Open directions to';
+  const dialogLabel = isRTL ? `تفاصيل الموقع: ${name}` : `Location details: ${name}`;
+
   const muted = 'color:#9ca3af;font-style:italic';
-  const link = 'color:#630d5f;text-decoration:none';
+  const link =
+    'color:#630d5f;text-decoration:none;outline-offset:2px;border-radius:2px';
 
   const phoneLine = l.phone
-    ? `<a href="tel:${l.phone}" style="${link}">${l.phone}</a>`
+    ? `<a href="tel:${l.phone}" aria-label="${labelCall} ${l.phone}" style="${link}">${l.phone}</a>`
     : `<span style="${muted}">${phoneFallback}</span>`;
 
   const emailLine = l.email
-    ? `<a href="mailto:${l.email}" style="${link}">${l.email}</a>`
+    ? `<a href="mailto:${l.email}" aria-label="${labelEmail} ${l.email}" style="${link}">${l.email}</a>`
     : `<span style="${muted}">${emailFallback}</span>`;
 
   const waLine = l.whatsapp
-    ? `<a href="https://wa.me/${l.whatsapp.replace(/\D/g, '')}" target="_blank" rel="noopener" style="${link}">${l.whatsapp}</a>`
+    ? `<a href="https://wa.me/${l.whatsapp.replace(/\D/g, '')}" target="_blank" rel="noopener" aria-label="${labelWa} ${l.whatsapp}" style="${link}">${l.whatsapp}</a>`
     : `<span style="${muted}">${waFallback}</span>`;
 
   const addressLine = address
@@ -33,14 +40,14 @@ export const buildLocationPopup = (l: MapLocation, isRTL: boolean): string => {
   const mapUrl = l.map_url || `https://www.google.com/maps?q=${l.latitude},${l.longitude}`;
 
   return `
-    <div style="min-width:220px;font-family:inherit;line-height:1.6">
+    <div role="dialog" aria-label="${dialogLabel}" tabindex="-1" style="min-width:220px;font-family:inherit;line-height:1.6;outline:none">
       <div style="font-weight:700;font-size:14px;margin-bottom:4px">${name}</div>
       ${addressLine}
-      <div style="font-size:12px">📞 ${phoneLine}</div>
-      <div style="font-size:12px">✉️ ${emailLine}</div>
-      <div style="font-size:12px">💬 ${waLine}</div>
+      <div style="font-size:12px"><span aria-hidden="true">📞</span> ${phoneLine}</div>
+      <div style="font-size:12px"><span aria-hidden="true">✉️</span> ${emailLine}</div>
+      <div style="font-size:12px"><span aria-hidden="true">💬</span> ${waLine}</div>
       <div style="font-size:12px;margin-top:6px">
-        <a href="${mapUrl}" target="_blank" rel="noopener" style="${link};font-weight:600">${directions}</a>
+        <a href="${mapUrl}" target="_blank" rel="noopener" aria-label="${labelDir} ${name}" style="${link};font-weight:600">${directions}</a>
       </div>
     </div>`;
 };
