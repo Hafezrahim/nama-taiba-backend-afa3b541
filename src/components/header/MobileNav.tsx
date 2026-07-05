@@ -1,9 +1,10 @@
 
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -14,11 +15,15 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
   const { t, language, setLanguage } = useLanguage();
   const { getCartCount } = useCart();
   const { wishlistItems } = useWishlist();
+  const { user } = useAuth();
+  const location = useLocation();
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'ar' : 'en');
     onClose();
   };
+
+  const isAuthPage = ['/login', '/signup'].includes(location.pathname);
 
   if (!isOpen) return null;
 
@@ -88,22 +93,27 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
         >
           {t('Wishlist', 'المفضلة')} ({wishlistItems.length})
         </Link>
-        {/* Sign In link also hidden from mobile menu but kept in code */}
-        <Link 
-          to="/login" 
-          className="hidden"
-          onClick={onClose}
-        >
-          {t('Sign In', 'تسجيل الدخول')}
-        </Link>
-        {/* Sign Up link also hidden for consistency */}
-        <Link 
-          to="/signup" 
-          className="hidden"
-          onClick={onClose}
-        >
-          {t('Sign Up', 'إنشاء حساب')}
-        </Link>
+
+        {/* Auth links — visible only when not logged in and not on auth pages */}
+        {!user && !isAuthPage && (
+          <>
+            <Link 
+              to="/login" 
+              className="font-medium text-nama-purple hover:text-nama-purple/80 transition-colors py-2"
+              onClick={onClose}
+            >
+              {t('Sign In', 'تسجيل الدخول')}
+            </Link>
+            <Link 
+              to="/signup" 
+              className="font-medium text-nama-purple hover:text-nama-purple/80 transition-colors py-2"
+              onClick={onClose}
+            >
+              {t('Sign Up', 'إنشاء حساب')}
+            </Link>
+          </>
+        )}
+
         <Button 
           variant="ghost" 
           className="font-bold justify-start px-0 hover:bg-transparent"
