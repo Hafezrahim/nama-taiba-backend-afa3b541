@@ -1,5 +1,5 @@
 
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { LogIn, UserPlus } from 'lucide-react';
@@ -7,8 +7,10 @@ import { LogIn, UserPlus } from 'lucide-react';
 const DesktopNav = () => {
   const { t, isRTL } = useLanguage();
   const { user } = useAuth();
+  const location = useLocation();
 
   const linkClass = "font-medium text-white hover:text-white hover:bg-green-600 px-4 py-2 rounded-lg transition-all";
+  const isAuthPage = ['/login', '/signup'].includes(location.pathname);
 
   return (
     <nav className={`hidden md:flex items-center ${isRTL ? 'space-x-reverse space-x-6' : 'space-x-6'}`}>
@@ -20,8 +22,8 @@ const DesktopNav = () => {
       <Link to="/blog" className={linkClass}>{t('Articles', 'المقالات')}</Link>
       <Link to="/contact" className={linkClass}>{t('Contact Us', 'تواصل معنا')}</Link>
 
-      {/* Auth Buttons — only when not logged in */}
-      {!user && (
+      {/* Auth Buttons — hidden when logged in or on auth pages */}
+      {!user && !isAuthPage && (
         <div className={`flex items-center gap-2 ${isRTL ? 'mr-4' : 'ml-4'} border-l border-white/20 ${isRTL ? 'pr-4' : 'pl-4'}`}>
           <Link
             to="/login"

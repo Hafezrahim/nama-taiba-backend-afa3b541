@@ -64,7 +64,7 @@ const UserActions = ({ toggleMobileMenu }: UserActionsProps) => {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className={`hidden md:flex items-center gap-2 text-white hover:text-white/80 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+              className={`flex items-center gap-2 text-white hover:text-white/80 transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
               aria-label={t('Account menu', 'قائمة الحساب')}
             >
               {userProfile?.avatar_url ? (
