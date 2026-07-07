@@ -925,6 +925,12 @@ export type Database = {
           name_ar: string
           name_en: string
           price: number
+          seo_description_ar: string | null
+          seo_description_en: string | null
+          seo_keywords_ar: string | null
+          seo_keywords_en: string | null
+          seo_title_ar: string | null
+          seo_title_en: string | null
           size: string | null
           updated_at: string | null
         }
@@ -943,6 +949,12 @@ export type Database = {
           name_ar: string
           name_en: string
           price?: number
+          seo_description_ar?: string | null
+          seo_description_en?: string | null
+          seo_keywords_ar?: string | null
+          seo_keywords_en?: string | null
+          seo_title_ar?: string | null
+          seo_title_en?: string | null
           size?: string | null
           updated_at?: string | null
         }
@@ -961,6 +973,12 @@ export type Database = {
           name_ar?: string
           name_en?: string
           price?: number
+          seo_description_ar?: string | null
+          seo_description_en?: string | null
+          seo_keywords_ar?: string | null
+          seo_keywords_en?: string | null
+          seo_title_ar?: string | null
+          seo_title_en?: string | null
           size?: string | null
           updated_at?: string | null
         }

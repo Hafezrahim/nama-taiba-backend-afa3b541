@@ -9,9 +9,10 @@ import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Globe, Search, Code, CheckCircle2 } from 'lucide-react';
+import { Loader2, Globe, Search, Code, CheckCircle2, Package } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import SeoIndexingTools from '@/components/admin/seo/SeoIndexingTools';
+import ProductSeoTable from '@/components/admin/seo/ProductSeoTable';
 
 export default function AdminSEO() {
   const { t } = useLanguage();
@@ -82,10 +83,14 @@ export default function AdminSEO() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:w-[600px] h-auto p-1 bg-muted/50">
+        <TabsList className="grid w-full grid-cols-3 lg:w-[800px] h-auto p-1 bg-muted/50">
           <TabsTrigger value="global" className="flex items-center gap-2 py-2.5">
             <Globe className="h-4 w-4" />
             <span>{t('Global Meta & Settings', 'العلامات الوصفية والإعدادات')}</span>
+          </TabsTrigger>
+          <TabsTrigger value="products" className="flex items-center gap-2 py-2.5">
+            <Package className="h-4 w-4" />
+            <span>{t('Product SEO', 'سيو المنتجات')}</span>
           </TabsTrigger>
           <TabsTrigger value="tools" className="flex items-center gap-2 py-2.5">
             <Search className="h-4 w-4" />
@@ -374,6 +379,11 @@ export default function AdminSEO() {
               </Button>
             </div>
           </form>
+        </TabsContent>
+
+        {/* Product SEO Tab */}
+        <TabsContent value="products" className="pb-12">
+          <ProductSeoTable />
         </TabsContent>
 
         {/* Advanced Tools Tab */}
