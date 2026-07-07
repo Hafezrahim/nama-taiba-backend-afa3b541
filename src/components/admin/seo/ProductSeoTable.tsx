@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { z } from 'zod';
+import { cn } from '@/lib/utils';
 import {
   Card,
   CardHeader,
@@ -37,7 +39,16 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import { Loader2, Package, Pencil, CheckCircle2, Search } from 'lucide-react';
+import {
+  Loader2,
+  Package,
+  Pencil,
+  CheckCircle2,
+  Search,
+  X,
+  Save,
+  AlertTriangle,
+} from 'lucide-react';
 
 type ProductRow = {
   id: string;
@@ -51,18 +62,117 @@ type ProductRow = {
   seo_keywords_ar: string | null;
 };
 
+type SeoFields = Pick<
+  ProductRow,
+  | 'seo_title_en'
+  | 'seo_title_ar'
+  | 'seo_description_en'
+  | 'seo_description_ar'
+  | 'seo_keywords_en'
+  | 'seo_keywords_ar'
+>;
+
 const PAGE_SIZE = 15;
+
+// SEO best-practice limits
+const LIMITS = {
+  titleMin: 30,
+  titleMax: 60,
+  descMin: 70,
+  descMax: 160,
+  keywordsMax: 255,
+};
+
+const seoSchema = z.object({
+  seo_title_en: z
+    .string()
+    .trim()
+    .max(LIMITS.titleMax, `Title must be ≤ ${LIMITS.titleMax} chars`)
+    .optional()
+    .or(z.literal('')),
+  seo_title_ar: z
+    .string()
+    .trim()
+    .max(LIMITS.titleMax, `العنوان يجب ألا يتجاوز ${LIMITS.titleMax} حرفًا`)
+    .optional()
+    .or(z.literal('')),
+  seo_description_en: z
+    .string()
+    .trim()
+    .max(LIMITS.descMax, `Description must be ≤ ${LIMITS.descMax} chars`)
+    .optional()
+    .or(z.literal('')),
+  seo_description_ar: z
+    .string()
+    .trim()
+    .max(LIMITS.descMax, `الوصف يجب ألا يتجاوز ${LIMITS.descMax} حرفًا`)
+    .optional()
+    .or(z.literal('')),
+  seo_keywords_en: z.string().trim().max(LIMITS.keywordsMax).optional().or(z.literal('')),
+  seo_keywords_ar: z.string().trim().max(LIMITS.keywordsMax).optional().or(z.literal('')),
+});
+
+/** Counter chip with color states (under min = warn, over max = error). */
+function Counter({
+  value,
+  min,
+  max,
+}: {
+  value: string;
+  min?: number;
+  max: number;
+}) {
+  const len = (value || '').length;
+  const over = len > max;
+  const under = typeof min === 'number' && len > 0 && len < min;
+  return (
+    <span
+      className={cn(
+        'text-xs tabular-nums',
+        over
+          ? 'text-destructive font-semibold'
+          : under
+            ? 'text-amber-600 dark:text-amber-400'
+            : 'text-muted-foreground'
+      )}
+    >
+      {len}/{max}
+      {min && !over && under ? ` · min ${min}` : ''}
+    </span>
+  );
+}
 
 export default function ProductSeoTable() {
   const { t, language } = useLanguage();
-  const isArabic = language === "ar";
+  const isArabic = language === 'ar';
   const queryClient = useQueryClient();
 
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string>('');
+
+  // Dialog edit state
   const [editing, setEditing] = useState<ProductRow | null>(null);
-  const [form, setForm] = useState<Partial<ProductRow>>({});
+  const [form, setForm] = useState<SeoFields>({
+    seo_title_en: '',
+    seo_title_ar: '',
+    seo_description_en: '',
+    seo_description_ar: '',
+    seo_keywords_en: '',
+    seo_keywords_ar: '',
+  });
+
+  // Inline row edit state
+  const [inlineId, setInlineId] = useState<string | null>(null);
+  const [inlineForm, setInlineForm] = useState<SeoFields>({
+    seo_title_en: '',
+    seo_title_ar: '',
+    seo_description_en: '',
+    seo_description_ar: '',
+    seo_keywords_en: '',
+    seo_keywords_ar: '',
+  });
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   const { data: products, isLoading } = useQuery({
     queryKey: ['admin-product-seo'],
@@ -97,21 +207,41 @@ export default function ProductSeoTable() {
   }, [search]);
 
   const mutation = useMutation({
-    mutationFn: async (payload: Partial<ProductRow> & { id: string }) => {
+    mutationFn: async (payload: SeoFields & { id: string }) => {
       const { id, ...updates } = payload;
+      const parsed = seoSchema.safeParse(updates);
+      if (!parsed.success) {
+        throw new Error(parsed.error.errors[0]?.message || 'Invalid input');
+      }
+      const clean: Record<string, string | null> = {};
+      (Object.keys(updates) as (keyof SeoFields)[]).forEach((k) => {
+        const v = (updates[k] || '').toString().trim();
+        clean[k] = v.length ? v : null;
+      });
       const { error } = await supabase
         .from('products')
-        .update(updates)
+        .update(clean)
         .eq('id', id);
       if (error) throw error;
+      return id;
     },
-    onSuccess: () => {
+    onMutate: (payload) => {
+      setSavingId(payload.id);
+    },
+    onSuccess: (id) => {
       queryClient.invalidateQueries({ queryKey: ['admin-product-seo'] });
-      toast.success(t('Product SEO updated', 'تم تحديث سيو المنتج'));
-      setEditing(null);
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+      toast.success(t('Product SEO saved', 'تم حفظ سيو المنتج'), {
+        description: t('Changes are now live.', 'التغييرات سارية الآن.'),
+      });
+      if (editing?.id === id) setEditing(null);
+      if (inlineId === id) setInlineId(null);
     },
     onError: (e: any) =>
-      toast.error(e?.message || t('Failed to update', 'فشل التحديث')),
+      toast.error(t('Failed to save', 'فشل الحفظ'), {
+        description: e?.message,
+      }),
+    onSettled: () => setSavingId(null),
   });
 
   const openEdit = (p: ProductRow) => {
@@ -126,9 +256,42 @@ export default function ProductSeoTable() {
     });
   };
 
-  const handleSave = () => {
+  const startInline = (p: ProductRow) => {
+    setInlineId(p.id);
+    setInlineForm({
+      seo_title_en: p.seo_title_en || '',
+      seo_title_ar: p.seo_title_ar || '',
+      seo_description_en: p.seo_description_en || '',
+      seo_description_ar: p.seo_description_ar || '',
+      seo_keywords_en: p.seo_keywords_en || '',
+      seo_keywords_ar: p.seo_keywords_ar || '',
+    });
+  };
+
+  const validateForm = (f: SeoFields): string | null => {
+    const parsed = seoSchema.safeParse(f);
+    if (!parsed.success) return parsed.error.errors[0]?.message || 'Invalid';
+    return null;
+  };
+
+  const handleDialogSave = () => {
     if (!editing) return;
+    const err = validateForm(form);
+    if (err) {
+      toast.error(t('Validation error', 'خطأ في التحقق'), { description: err });
+      return;
+    }
     mutation.mutate({ id: editing.id, ...form });
+  };
+
+  const handleInlineSave = () => {
+    if (!inlineId) return;
+    const err = validateForm(inlineForm);
+    if (err) {
+      toast.error(t('Validation error', 'خطأ في التحقق'), { description: err });
+      return;
+    }
+    mutation.mutate({ id: inlineId, ...inlineForm });
   };
 
   const handleLoadSelected = () => {
@@ -145,8 +308,8 @@ export default function ProductSeoTable() {
         </CardTitle>
         <CardDescription>
           {t(
-            'Select a product and edit its bilingual SEO title, description, and keywords.',
-            'اختر منتجًا وحرر عنوان ووصف وكلمات السيو الخاصة به بالعربية والإنجليزية.'
+            `Recommended: title ${LIMITS.titleMin}–${LIMITS.titleMax} chars, description ${LIMITS.descMin}–${LIMITS.descMax} chars.`,
+            `يفضّل: عنوان ${LIMITS.titleMin}–${LIMITS.titleMax} حرفًا، وصف ${LIMITS.descMin}–${LIMITS.descMax} حرفًا.`
           )}
         </CardDescription>
       </CardHeader>
@@ -170,132 +333,294 @@ export default function ProductSeoTable() {
               </SelectContent>
             </Select>
           </div>
-          <Button
-            type="button"
-            onClick={handleLoadSelected}
-            disabled={!selectedId}
-          >
+          <Button type="button" onClick={handleLoadSelected} disabled={!selectedId}>
             <Pencil className="h-4 w-4 me-2" />
-            {t('Edit SEO', 'تحرير السيو')}
+            {t('Open editor', 'فتح المحرر')}
           </Button>
         </div>
 
-        {/* Search + Table */}
-        <div className="space-y-3">
-          <div className="relative max-w-sm">
-            <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t('Search products…', 'بحث في المنتجات…')}
-              className="ps-9"
-            />
-          </div>
+        {/* Search */}
+        <div className="relative max-w-sm">
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t('Search products…', 'بحث في المنتجات…')}
+            className="ps-9"
+          />
+        </div>
 
-          <div className="border rounded-lg overflow-x-auto">
-            <Table>
-              <TableHeader>
+        {/* Table */}
+        <div className="border rounded-lg overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="min-w-[160px]">{t('Product', 'المنتج')}</TableHead>
+                <TableHead className="min-w-[220px]">{t('SEO Title (EN)', 'عنوان السيو (EN)')}</TableHead>
+                <TableHead className="min-w-[220px]">{t('SEO Title (AR)', 'عنوان السيو (AR)')}</TableHead>
+                <TableHead className="min-w-[260px]">{t('Description (EN)', 'الوصف (EN)')}</TableHead>
+                <TableHead className="min-w-[260px]">{t('Description (AR)', 'الوصف (AR)')}</TableHead>
+                <TableHead className="min-w-[180px]">{t('Keywords (EN)', 'الكلمات (EN)')}</TableHead>
+                <TableHead className="min-w-[180px]">{t('Keywords (AR)', 'الكلمات (AR)')}</TableHead>
+                <TableHead className="text-end min-w-[140px]">{t('Actions', 'إجراءات')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isLoading ? (
                 <TableRow>
-                  <TableHead>{t('Product', 'المنتج')}</TableHead>
-                  <TableHead>{t('SEO Title (EN)', 'عنوان السيو (EN)')}</TableHead>
-                  <TableHead>{t('SEO Title (AR)', 'عنوان السيو (AR)')}</TableHead>
-                  <TableHead>{t('Keywords (EN)', 'الكلمات (EN)')}</TableHead>
-                  <TableHead>{t('Keywords (AR)', 'الكلمات (AR)')}</TableHead>
-                  <TableHead className="text-end">
-                    {t('Actions', 'إجراءات')}
-                  </TableHead>
+                  <TableCell colSpan={8} className="text-center py-8">
+                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-                    </TableCell>
-                  </TableRow>
-                ) : paged.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      className="text-center py-8 text-muted-foreground"
-                    >
-                      {t('No products found', 'لا توجد منتجات')}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  paged.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-medium">
-                        {isArabic
-                          ? p.name_ar || p.name_en
-                          : p.name_en || p.name_ar}
+              ) : paged.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    {t('No products found', 'لا توجد منتجات')}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                paged.map((p) => {
+                  const isInline = inlineId === p.id;
+                  const isSaving = savingId === p.id;
+                  return (
+                    <TableRow key={p.id} className={cn(isInline && 'bg-muted/30 align-top')}>
+                      <TableCell className="font-medium align-top">
+                        {isArabic ? p.name_ar || p.name_en : p.name_en || p.name_ar}
                       </TableCell>
-                      <TableCell className="max-w-[220px] truncate text-muted-foreground">
-                        {p.seo_title_en || (
-                          <span className="italic opacity-60">
-                            {t('— empty —', '— فارغ —')}
-                          </span>
+
+                      {/* Title EN */}
+                      <TableCell className="align-top">
+                        {isInline ? (
+                          <div className="space-y-1">
+                            <Input
+                              dir="ltr"
+                              value={inlineForm.seo_title_en || ''}
+                              onChange={(e) =>
+                                setInlineForm((f) => ({ ...f, seo_title_en: e.target.value }))
+                              }
+                              className="h-8 text-sm"
+                            />
+                            <Counter
+                              value={inlineForm.seo_title_en || ''}
+                              min={LIMITS.titleMin}
+                              max={LIMITS.titleMax}
+                            />
+                          </div>
+                        ) : (
+                          <TruncCell value={p.seo_title_en} />
                         )}
                       </TableCell>
-                      <TableCell className="max-w-[220px] truncate text-muted-foreground" dir="rtl">
-                        {p.seo_title_ar || (
-                          <span className="italic opacity-60">
-                            {t('— empty —', '— فارغ —')}
-                          </span>
+
+                      {/* Title AR */}
+                      <TableCell className="align-top" dir="rtl">
+                        {isInline ? (
+                          <div className="space-y-1">
+                            <Input
+                              dir="rtl"
+                              value={inlineForm.seo_title_ar || ''}
+                              onChange={(e) =>
+                                setInlineForm((f) => ({ ...f, seo_title_ar: e.target.value }))
+                              }
+                              className="h-8 text-sm"
+                            />
+                            <Counter
+                              value={inlineForm.seo_title_ar || ''}
+                              min={LIMITS.titleMin}
+                              max={LIMITS.titleMax}
+                            />
+                          </div>
+                        ) : (
+                          <TruncCell value={p.seo_title_ar} />
                         )}
                       </TableCell>
-                      <TableCell className="max-w-[180px] truncate text-muted-foreground">
-                        {p.seo_keywords_en || '—'}
+
+                      {/* Desc EN */}
+                      <TableCell className="align-top">
+                        {isInline ? (
+                          <div className="space-y-1">
+                            <Textarea
+                              dir="ltr"
+                              rows={2}
+                              value={inlineForm.seo_description_en || ''}
+                              onChange={(e) =>
+                                setInlineForm((f) => ({
+                                  ...f,
+                                  seo_description_en: e.target.value,
+                                }))
+                              }
+                              className="text-sm min-h-[56px]"
+                            />
+                            <Counter
+                              value={inlineForm.seo_description_en || ''}
+                              min={LIMITS.descMin}
+                              max={LIMITS.descMax}
+                            />
+                          </div>
+                        ) : (
+                          <TruncCell value={p.seo_description_en} lines={2} />
+                        )}
                       </TableCell>
-                      <TableCell className="max-w-[180px] truncate text-muted-foreground" dir="rtl">
-                        {p.seo_keywords_ar || '—'}
+
+                      {/* Desc AR */}
+                      <TableCell className="align-top" dir="rtl">
+                        {isInline ? (
+                          <div className="space-y-1">
+                            <Textarea
+                              dir="rtl"
+                              rows={2}
+                              value={inlineForm.seo_description_ar || ''}
+                              onChange={(e) =>
+                                setInlineForm((f) => ({
+                                  ...f,
+                                  seo_description_ar: e.target.value,
+                                }))
+                              }
+                              className="text-sm min-h-[56px]"
+                            />
+                            <Counter
+                              value={inlineForm.seo_description_ar || ''}
+                              min={LIMITS.descMin}
+                              max={LIMITS.descMax}
+                            />
+                          </div>
+                        ) : (
+                          <TruncCell value={p.seo_description_ar} lines={2} />
+                        )}
                       </TableCell>
-                      <TableCell className="text-end">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => openEdit(p)}
-                        >
-                          <Pencil className="h-3.5 w-3.5 me-1.5" />
-                          {t('Edit', 'تحرير')}
-                        </Button>
+
+                      {/* Keywords EN */}
+                      <TableCell className="align-top">
+                        {isInline ? (
+                          <div className="space-y-1">
+                            <Input
+                              dir="ltr"
+                              value={inlineForm.seo_keywords_en || ''}
+                              onChange={(e) =>
+                                setInlineForm((f) => ({
+                                  ...f,
+                                  seo_keywords_en: e.target.value,
+                                }))
+                              }
+                              className="h-8 text-sm"
+                              placeholder="kw1, kw2"
+                            />
+                            <Counter
+                              value={inlineForm.seo_keywords_en || ''}
+                              max={LIMITS.keywordsMax}
+                            />
+                          </div>
+                        ) : (
+                          <TruncCell value={p.seo_keywords_en} />
+                        )}
+                      </TableCell>
+
+                      {/* Keywords AR */}
+                      <TableCell className="align-top" dir="rtl">
+                        {isInline ? (
+                          <div className="space-y-1">
+                            <Input
+                              dir="rtl"
+                              value={inlineForm.seo_keywords_ar || ''}
+                              onChange={(e) =>
+                                setInlineForm((f) => ({
+                                  ...f,
+                                  seo_keywords_ar: e.target.value,
+                                }))
+                              }
+                              className="h-8 text-sm"
+                              placeholder="ك1، ك2"
+                            />
+                            <Counter
+                              value={inlineForm.seo_keywords_ar || ''}
+                              max={LIMITS.keywordsMax}
+                            />
+                          </div>
+                        ) : (
+                          <TruncCell value={p.seo_keywords_ar} />
+                        )}
+                      </TableCell>
+
+                      {/* Actions */}
+                      <TableCell className="text-end align-top">
+                        {isInline ? (
+                          <div className="flex justify-end gap-1.5">
+                            <Button
+                              size="sm"
+                              onClick={handleInlineSave}
+                              disabled={isSaving}
+                            >
+                              {isSaving ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Save className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setInlineId(null)}
+                              disabled={isSaving}
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex justify-end gap-1.5">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => startInline(p)}
+                              title={t('Inline edit', 'تحرير مباشر')}
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => openEdit(p)}
+                              title={t('Open dialog', 'فتح النافذة')}
+                            >
+                              {t('Full', 'كامل')}
+                            </Button>
+                          </div>
+                        )}
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                {t('Page', 'صفحة')} {page} / {totalPages}
-              </span>
-              <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={page === 1}
-                  onClick={() => setPage((p) => p - 1)}
-                >
-                  {t('Prev', 'السابق')}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={page === totalPages}
-                  onClick={() => setPage((p) => p + 1)}
-                >
-                  {t('Next', 'التالي')}
-                </Button>
-              </div>
-            </div>
-          )}
+                  );
+                })
+              )}
+            </TableBody>
+          </Table>
         </div>
+
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">
+              {t('Page', 'صفحة')} {page} / {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page === 1}
+                onClick={() => setPage((p) => p - 1)}
+              >
+                {t('Prev', 'السابق')}
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={page === totalPages}
+                onClick={() => setPage((p) => p + 1)}
+              >
+                {t('Next', 'التالي')}
+              </Button>
+            </div>
+          </div>
+        )}
       </CardContent>
 
-      {/* Edit dialog */}
+      {/* Full edit dialog */}
       <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -311,134 +636,180 @@ export default function ProductSeoTable() {
             </DialogTitle>
             <DialogDescription>
               {t(
-                'Bilingual meta fields used on the product page.',
-                'حقول ميتا ثنائية اللغة تُستخدم في صفحة المنتج.'
+                'Bilingual meta fields used on the product page. Follow the recommended limits for the best search preview.',
+                'حقول ميتا ثنائية اللغة تُستخدم في صفحة المنتج. التزم بالحدود الموصى بها للحصول على أفضل معاينة في البحث.'
               )}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5">
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>{t('SEO Title (English)', 'عنوان السيو (إنجليزي)')}</Label>
-                <Input
-                  dir="ltr"
-                  value={form.seo_title_en || ''}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, seo_title_en: e.target.value }))
-                  }
-                  placeholder="Product name | Brand"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {(form.seo_title_en || '').length}/60
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label>{t('SEO Title (Arabic)', 'عنوان السيو (عربي)')}</Label>
-                <Input
-                  dir="rtl"
-                  value={form.seo_title_ar || ''}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, seo_title_ar: e.target.value }))
-                  }
-                  placeholder="اسم المنتج | العلامة"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {(form.seo_title_ar || '').length}/60
-                </p>
-              </div>
+              <FieldBlock
+                label={t('SEO Title (English)', 'عنوان السيو (إنجليزي)')}
+                dir="ltr"
+                value={form.seo_title_en || ''}
+                onChange={(v) => setForm((f) => ({ ...f, seo_title_en: v }))}
+                min={LIMITS.titleMin}
+                max={LIMITS.titleMax}
+                placeholder="Product name | Brand"
+              />
+              <FieldBlock
+                label={t('SEO Title (Arabic)', 'عنوان السيو (عربي)')}
+                dir="rtl"
+                value={form.seo_title_ar || ''}
+                onChange={(v) => setForm((f) => ({ ...f, seo_title_ar: v }))}
+                min={LIMITS.titleMin}
+                max={LIMITS.titleMax}
+                placeholder="اسم المنتج | العلامة"
+              />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>
-                  {t('Meta Description (English)', 'الوصف التعريفي (إنجليزي)')}
-                </Label>
-                <Textarea
-                  dir="ltr"
-                  rows={3}
-                  value={form.seo_description_en || ''}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      seo_description_en: e.target.value,
-                    }))
-                  }
-                />
-                <p className="text-xs text-muted-foreground">
-                  {(form.seo_description_en || '').length}/160
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label>
-                  {t('Meta Description (Arabic)', 'الوصف التعريفي (عربي)')}
-                </Label>
-                <Textarea
-                  dir="rtl"
-                  rows={3}
-                  value={form.seo_description_ar || ''}
-                  onChange={(e) =>
-                    setForm((f) => ({
-                      ...f,
-                      seo_description_ar: e.target.value,
-                    }))
-                  }
-                />
-                <p className="text-xs text-muted-foreground">
-                  {(form.seo_description_ar || '').length}/160
-                </p>
-              </div>
+              <FieldBlock
+                label={t('Meta Description (English)', 'الوصف التعريفي (إنجليزي)')}
+                dir="ltr"
+                value={form.seo_description_en || ''}
+                onChange={(v) => setForm((f) => ({ ...f, seo_description_en: v }))}
+                min={LIMITS.descMin}
+                max={LIMITS.descMax}
+                textarea
+              />
+              <FieldBlock
+                label={t('Meta Description (Arabic)', 'الوصف التعريفي (عربي)')}
+                dir="rtl"
+                value={form.seo_description_ar || ''}
+                onChange={(v) => setForm((f) => ({ ...f, seo_description_ar: v }))}
+                min={LIMITS.descMin}
+                max={LIMITS.descMax}
+                textarea
+              />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-2">
-                <Label>{t('Keywords (English)', 'الكلمات (إنجليزي)')}</Label>
-                <Textarea
-                  dir="ltr"
-                  rows={2}
-                  value={form.seo_keywords_en || ''}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, seo_keywords_en: e.target.value }))
-                  }
-                  placeholder="grc panels, construction, saudi"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('Separate with commas', 'افصل بينها بفواصل')}
-                </p>
-              </div>
-              <div className="space-y-2">
-                <Label>{t('Keywords (Arabic)', 'الكلمات (عربي)')}</Label>
-                <Textarea
-                  dir="rtl"
-                  rows={2}
-                  value={form.seo_keywords_ar || ''}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, seo_keywords_ar: e.target.value }))
-                  }
-                  placeholder="ألواح جي ار سي، بناء، السعودية"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('Separate with commas', 'افصل بينها بفواصل')}
-                </p>
-              </div>
+              <FieldBlock
+                label={t('Keywords (English)', 'الكلمات (إنجليزي)')}
+                dir="ltr"
+                value={form.seo_keywords_en || ''}
+                onChange={(v) => setForm((f) => ({ ...f, seo_keywords_en: v }))}
+                max={LIMITS.keywordsMax}
+                textarea
+                hint={t('Separate with commas', 'افصل بينها بفواصل')}
+              />
+              <FieldBlock
+                label={t('Keywords (Arabic)', 'الكلمات (عربي)')}
+                dir="rtl"
+                value={form.seo_keywords_ar || ''}
+                onChange={(v) => setForm((f) => ({ ...f, seo_keywords_ar: v }))}
+                max={LIMITS.keywordsMax}
+                textarea
+                hint={t('Separate with commas', 'افصل بينها بفواصل')}
+              />
             </div>
+
+            {/* Validation summary */}
+            {(() => {
+              const err = validateForm(form);
+              if (!err) return null;
+              return (
+                <div className="flex items-start gap-2 rounded-md bg-destructive/10 text-destructive p-3 text-sm">
+                  <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+                  <span>{err}</span>
+                </div>
+              );
+            })()}
           </div>
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setEditing(null)}>
               {t('Cancel', 'إلغاء')}
             </Button>
-            <Button onClick={handleSave} disabled={mutation.isPending}>
+            <Button
+              onClick={handleDialogSave}
+              disabled={mutation.isPending || !!validateForm(form)}
+            >
               {mutation.isPending ? (
                 <Loader2 className="h-4 w-4 me-2 animate-spin" />
               ) : (
                 <CheckCircle2 className="h-4 w-4 me-2" />
               )}
-              {t('Save', 'حفظ')}
+              {t('Save changes', 'حفظ التغييرات')}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </Card>
+  );
+}
+
+function TruncCell({
+  value,
+  lines = 1,
+}: {
+  value: string | null;
+  lines?: number;
+}) {
+  if (!value) {
+    return (
+      <span className="italic text-muted-foreground/60 text-sm">—</span>
+    );
+  }
+  return (
+    <span
+      className={cn(
+        'text-sm text-muted-foreground block',
+        lines === 1 ? 'truncate max-w-[220px]' : 'line-clamp-2 max-w-[280px]'
+      )}
+      title={value}
+    >
+      {value}
+    </span>
+  );
+}
+
+function FieldBlock({
+  label,
+  value,
+  onChange,
+  dir,
+  min,
+  max,
+  placeholder,
+  textarea,
+  hint,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  dir: 'ltr' | 'rtl';
+  min?: number;
+  max: number;
+  placeholder?: string;
+  textarea?: boolean;
+  hint?: string;
+}) {
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <Label className="text-sm font-semibold">{label}</Label>
+        <Counter value={value} min={min} max={max} />
+      </div>
+      {textarea ? (
+        <Textarea
+          dir={dir}
+          rows={3}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+        />
+      ) : (
+        <Input
+          dir={dir}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+        />
+      )}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+    </div>
   );
 }
