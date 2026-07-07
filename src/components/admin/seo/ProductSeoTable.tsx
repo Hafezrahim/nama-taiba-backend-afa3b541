@@ -54,7 +54,8 @@ type ProductRow = {
 const PAGE_SIZE = 15;
 
 export default function ProductSeoTable() {
-  const { t, isArabic } = useLanguage();
+  const { t, language } = useLanguage();
+  const isArabic = language === "ar";
   const queryClient = useQueryClient();
 
   const [search, setSearch] = useState('');
