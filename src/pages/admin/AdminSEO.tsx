@@ -381,6 +381,11 @@ export default function AdminSEO() {
           </form>
         </TabsContent>
 
+        {/* Product SEO Tab */}
+        <TabsContent value="products" className="pb-12">
+          <ProductSeoTable />
+        </TabsContent>
+
         {/* Advanced Tools Tab */}
         <TabsContent value="tools" className="pb-12">
             <SeoIndexingTools
