@@ -73,7 +73,7 @@ const AboutSection = () => {
           <div className={isRTL ? 'order-1' : 'order-2'}>
             <div className="bg-white p-3 shadow-xl rounded-lg transform -rotate-2">
               <img 
-                src={aboutData.vision.image || "https://www.nama-taiba.com/build/assets/about-7eff9a9c.png"} 
+                src={aboutInfo.vision.image || "https://www.nama-taiba.com/build/assets/about-7eff9a9c.png"} 
                 alt={t('Nama Taiba Factory', 'مصنع نما طيبة')} 
                 className="w-full h-auto rounded-lg" 
               />
