@@ -141,28 +141,7 @@ const ProductsSection = () => {
             ))}
           </div>
         )
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-          {[1, 2, 3, 4, 5, 6, 7, 8].map((id) => (
-            <Card key={id} className="card-hover overflow-hidden">
-              <div className="h-36 md:h-48 overflow-hidden">
-                <img src={`https://images.unsplash.com/photo-158109122682${id}-a6a2a5aee158?w=500`} alt="Product" className="w-full h-full object-cover" />
-              </div>
-              <CardHeader className="p-3 md:p-6 pb-1 md:pb-2">
-                <CardTitle className="text-sm md:text-base">{language === 'en' ? `Sample Product ${id}` : `منتج عينة ${id}`}</CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 md:p-6 pt-0 pb-1 md:pb-2">
-                <p className="text-nama-purple font-bold text-sm md:text-base">{100 * id} {t('SAR', 'ر.س')}</p>
-              </CardContent>
-              <CardFooter className="p-3 md:p-6 pt-0">
-                <Link to="/products" className="w-full">
-                  <Button className="w-full bg-nama-orange hover:bg-nama-purple text-xs md:text-sm h-8 md:h-10">{t('View Details', 'عرض التفاصيل')}</Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-      )}
+      ) : null}
       
       <div className="text-center mt-10">
         <Link to="/products">
