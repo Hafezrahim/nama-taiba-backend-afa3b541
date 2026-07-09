@@ -120,7 +120,7 @@ const ProjectsSection = () => {
       {isMobile ? (
         <Carousel opts={{ align: "start", direction: language === 'ar' ? 'rtl' : 'ltr' }} className="w-full">
           <CarouselContent>
-            {displayProjects.map((project) => (
+            {projects.map((project) => (
               <CarouselItem key={project.id} className="basis-[85%]">
                 <ProjectCard project={project} />
               </CarouselItem>
@@ -129,7 +129,7 @@ const ProjectsSection = () => {
         </Carousel>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {displayProjects.map((project) => (
+          {projects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
