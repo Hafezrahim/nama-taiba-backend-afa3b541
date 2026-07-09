@@ -57,7 +57,7 @@ const ServicesSection = () => {
       <div className="container mx-auto px-4">
         <h2 className="section-title">{t('Our Services', 'خدماتنا')}</h2>
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-          {displayServices.map((service) => (
+          {services.map((service) => (
             <Card key={service.id} className="card-hover border-none shadow-lg">
               <CardHeader>
                 <div className="w-16 h-16 rounded-full bg-nama-purple flex items-center justify-center mb-4">
