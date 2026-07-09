@@ -25,7 +25,7 @@ interface UserActionsProps {
 const UserActions = ({ toggleMobileMenu }: UserActionsProps) => {
   const { language, setLanguage, isRTL, t } = useLanguage();
   const { wishlistItems } = useWishlist();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, userRole } = useAuth();
 
   const { data: userProfile } = useQuery({
     queryKey: ['user-profile-header', user?.id],
@@ -96,12 +96,22 @@ const UserActions = ({ toggleMobileMenu }: UserActionsProps) => {
                 </Link>
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem asChild>
-              <Link to="/client" className={`flex items-center gap-2 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
-                <LayoutDashboard className="h-4 w-4" />
-                <span>{t('Client Dashboard', 'لوحة تحكم العميل')}</span>
-              </Link>
-            </DropdownMenuItem>
+            {userRole === 'marketer' && (
+              <DropdownMenuItem asChild>
+                <Link to="/marketer" className={`flex items-center gap-2 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span>{t('Marketer Dashboard', 'لوحة تحكم المسوق')}</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
+            {userRole !== 'marketer' && userRole !== 'admin' && (
+              <DropdownMenuItem asChild>
+                <Link to="/client" className={`flex items-center gap-2 cursor-pointer ${isRTL ? 'flex-row-reverse' : ''}`}>
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span>{t('Client Dashboard', 'لوحة تحكم العميل')}</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => supabase.auth.signOut()}

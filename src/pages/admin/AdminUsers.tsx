@@ -247,6 +247,27 @@ export default function AdminUsers() {
         allowed_pages: permMap.get(role.user_id) || [],
       }));
 
+      // Fetch emails securely via Postgres RPC
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: emailData, error: emailError } = await supabase.rpc('get_user_emails');
+          
+          if (emailError) {
+            console.error("RPC error:", emailError);
+            toast.error("Failed to fetch user emails: " + (emailError.message || "Unknown error"));
+          } else if (emailData) {
+            const emailMap = new Map<string, string>(emailData.map((e: any) => [String(e.id), String(e.email)]));
+            usersWithProfiles.forEach(user => {
+              user.email = emailMap.get(user.user_id);
+            });
+          }
+        }
+      } catch (err: any) {
+        console.error('Failed to invoke get_user_emails RPC:', err);
+        toast.error("Error fetching emails: " + (err.message || "Unknown error"));
+      }
+
       setUsers(usersWithProfiles);
     } catch (error: any) {
       console.error('Error fetching users:', error);
@@ -864,11 +885,13 @@ export default function AdminUsers() {
                     <TableCell>
                       <div className="flex flex-col">
                         <span className="font-medium">
-                          {(isRTL ? user.profile?.full_name_ar : user.profile?.full_name_en) ||
+                          {(isRTL 
+                            ? (user.profile?.full_name_ar || user.profile?.full_name_en) 
+                            : (user.profile?.full_name_en || user.profile?.full_name_ar)) ||
                             t('Unnamed User', 'مستخدم بدون اسم')}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {user.user_id.substring(0, 8)}...
+                          {user.email || `${user.user_id.substring(0, 8)}...`}
                         </span>
                       </div>
                     </TableCell>

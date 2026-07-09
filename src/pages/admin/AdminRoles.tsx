@@ -20,6 +20,7 @@ interface UserRole {
     full_name_en?: string;
     full_name_ar?: string;
   };
+  email?: string;
 }
 
 export default function AdminRoles() {
@@ -51,10 +52,31 @@ export default function AdminRoles() {
         (profiles || []).map(p => [p.id, p])
       );
 
-      setRoles((data || []).map(r => ({
+      const rolesWithProfiles = (data || []).map(r => ({
         ...r,
         profiles: profileMap.get(r.user_id) || undefined,
-      })));
+      }));
+
+      // Fetch emails securely via Postgres RPC
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          const { data: emailData, error: emailError } = await supabase.rpc('get_user_emails');
+          
+          if (emailError) {
+            console.error("RPC error:", emailError);
+          } else if (emailData) {
+            const emailMap = new Map<string, string>(emailData.map((e: any) => [String(e.id), String(e.email)]));
+            rolesWithProfiles.forEach(role => {
+              role.email = emailMap.get(role.user_id);
+            });
+          }
+        }
+      } catch (err: any) {
+        console.error('Failed to invoke get_user_emails RPC:', err);
+      }
+
+      setRoles(rolesWithProfiles);
     } catch (error: any) {
       toast.error(t('Failed to load roles', 'فشل تحميل الأدوار'));
     } finally {
@@ -148,7 +170,17 @@ export default function AdminRoles() {
               roles.map((role) => (
                 <TableRow key={role.id}>
                   <TableCell className="font-medium">
-                    {(isRTL ? role.profiles?.full_name_ar : role.profiles?.full_name_en) || role.profiles?.full_name_en || role.user_id.substring(0, 8) + '...'}
+                    <div className="flex flex-col">
+                      <span>
+                        {(isRTL 
+                          ? (role.profiles?.full_name_ar || role.profiles?.full_name_en) 
+                          : (role.profiles?.full_name_en || role.profiles?.full_name_ar)) || 
+                          t('Unnamed User', 'مستخدم بدون اسم')}
+                      </span>
+                      <span className="text-xs text-muted-foreground font-normal">
+                        {role.email || `${role.user_id.substring(0, 8)}...`}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <Select

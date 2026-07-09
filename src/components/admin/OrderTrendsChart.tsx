@@ -10,7 +10,7 @@ import { TrendingUp } from 'lucide-react';
 
 const OrderTrendsChart = () => {
   const { t, language } = useLanguage();
-  const [days, setDays] = useState<7 | 30>(7);
+  const [days, setDays] = useState<7 | 30 | 365>(7);
 
   const { data: chartData, isLoading } = useQuery({
     queryKey: ['order-trends', days],
@@ -99,6 +99,14 @@ const OrderTrendsChart = () => {
               className="transition-all"
             >
               {t('30 Days', '30 يوم')}
+            </Button>
+            <Button
+              variant={days === 365 ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setDays(365)}
+              className="transition-all"
+            >
+              {t('This Year', 'هذا العام')}
             </Button>
           </div>
         </div>

@@ -60,10 +60,40 @@ export default function MarketerQuotations() {
         .from('products')
         .select('id, name_en, name_ar')
         .eq('is_active', true);
-      
       if (error) throw error;
       return data;
     }
+  });
+
+  // Fetch cities
+  const { data: cities } = useQuery({
+    queryKey: ['cities-active'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('cities')
+        .select('id, name_en, name_ar')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    }
+  });
+
+  // Fetch districts based on selected city
+  const { data: districts } = useQuery({
+    queryKey: ['districts-active', clientInfo.city],
+    queryFn: async () => {
+      if (!clientInfo.city) return [];
+      const { data, error } = await supabase
+        .from('districts')
+        .select('id, city_id, name_en, name_ar')
+        .eq('is_active', true)
+        .eq('city_id', clientInfo.city)
+        .order('display_order', { ascending: true });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!clientInfo.city
   });
 
   const mutation = useMutation({
@@ -85,9 +115,14 @@ export default function MarketerQuotations() {
         };
       });
 
+      const selectedCity = cities?.find(c => c.id === clientInfo.city);
+      const selectedDistrict = districts?.find(d => d.id === clientInfo.district);
+
       const messageData = JSON.stringify({
-        city: clientInfo.city,
-        district: clientInfo.district,
+        city: selectedCity ? (isRTL ? selectedCity.name_ar : selectedCity.name_en) : clientInfo.city,
+        city_id: clientInfo.city,
+        district: selectedDistrict ? (isRTL ? selectedDistrict.name_ar : selectedDistrict.name_en) : clientInfo.district,
+        district_id: clientInfo.district,
         street: clientInfo.street,
         needDelivery: clientInfo.needDelivery === 'yes',
         items: itemsWithDetails
@@ -233,17 +268,40 @@ export default function MarketerQuotations() {
                   
                   <div className="space-y-2">
                     <Label>{t('City', 'المدينة')}</Label>
-                    <Input
+                    <Select
                       value={clientInfo.city}
-                      onChange={e => setClientInfo({ ...clientInfo, city: e.target.value })}
-                    />
+                      onValueChange={(val) => setClientInfo({ ...clientInfo, city: val, district: '' })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('Select City', 'اختر المدينة')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cities?.map((city) => (
+                          <SelectItem key={city.id} value={city.id}>
+                            {isRTL ? city.name_ar : city.name_en}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
                     <Label>{t('District', 'الحي')}</Label>
-                    <Input
+                    <Select
                       value={clientInfo.district}
-                      onChange={e => setClientInfo({ ...clientInfo, district: e.target.value })}
-                    />
+                      onValueChange={(val) => setClientInfo({ ...clientInfo, district: val })}
+                      disabled={!clientInfo.city || (districts && districts.length === 0)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('Select District', 'اختر الحي')} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {districts?.map((district) => (
+                          <SelectItem key={district.id} value={district.id}>
+                            {isRTL ? district.name_ar : district.name_en}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2 md:col-span-2">
                     <Label>{t('Street', 'الشارع')}</Label>

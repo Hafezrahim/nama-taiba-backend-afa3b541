@@ -14,6 +14,9 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import OrderTrendsChart from '@/components/admin/OrderTrendsChart';
 import RecentOrdersWidget from '@/components/admin/RecentOrdersWidget';
+import TopProductsChart from '@/components/admin/analytics/TopProductsChart';
+import TopClientsWidget from '@/components/admin/analytics/TopClientsWidget';
+import QuotationsFollowUpWidget from '@/components/admin/analytics/QuotationsFollowUpWidget';
 import { cn } from '@/lib/utils';
 
 const AdminDashboard = () => {
@@ -376,11 +379,26 @@ const AdminDashboard = () => {
         </Link>
       </div>
 
-      {/* Recent Orders */}
-      <RecentOrdersWidget language={language} t={t} formatCurrency={formatCurrency} />
+      {/* Analytics Grid row 1 */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
+        <OrderTrendsChart />
+        <TopProductsChart />
+      </div>
 
-      {/* Order Trends Chart */}
-      <OrderTrendsChart />
+      {/* Analytics Grid row 2 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+        <div className="lg:col-span-2">
+          <RecentOrdersWidget language={language} t={t} formatCurrency={formatCurrency} />
+        </div>
+        <div className="lg:col-span-1 flex flex-col gap-4 lg:gap-6">
+          <div className="flex-1">
+            <TopClientsWidget />
+          </div>
+          <div className="flex-1">
+            <QuotationsFollowUpWidget />
+          </div>
+        </div>
+      </div>
 
       {/* Shipping Summary Section */}
       <Card className="border-0 shadow-lg">
