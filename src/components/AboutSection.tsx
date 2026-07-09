@@ -41,21 +41,27 @@ const AboutSection = () => {
     loadProfileUrl();
   }, []);
 
-  // Updated placeholder data with the new content if API data not loaded yet
-  const aboutData = aboutInfo || {
-    vision: { 
-      content_ar: 'رؤيتنا هي أن نكون المصنع الأول في المملكة للجودة والخدمات', 
-      content_en: 'Our vision is to be the top manufacturer in Saudi Arabia for quality' 
-    },
-    mission: { 
-      content_ar: 'تقديم منتجات بلوك بمعايير عالمية', 
-      content_en: 'Deliver block products with global standards' 
-    },
-    history: { 
-      content_ar: 'تأسس المصنع في 2016 في المدينة المنورة', 
-      content_en: 'Established in 2016 in Madinah' 
-    }
-  };
+  if (loading) {
+    return (
+      <div className="bg-gray-50 py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="section-title">{t('About Nama Taiba', 'عن نما طيبة')}</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />
+            <div className="space-y-6">
+              <div className="animate-pulse bg-gray-200 h-6 rounded w-3/4" />
+              <div className="animate-pulse bg-gray-200 h-4 rounded" />
+              <div className="animate-pulse bg-gray-200 h-4 rounded w-5/6" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!aboutInfo) {
+    return null;
+  }
 
   return (
     <div className="bg-gray-50 py-16">
@@ -67,7 +73,7 @@ const AboutSection = () => {
           <div className={isRTL ? 'order-1' : 'order-2'}>
             <div className="bg-white p-3 shadow-xl rounded-lg transform -rotate-2">
               <img 
-                src={aboutData.vision.image || "https://www.nama-taiba.com/build/assets/about-7eff9a9c.png"} 
+                src={aboutInfo.vision.image || "https://www.nama-taiba.com/build/assets/about-7eff9a9c.png"} 
                 alt={t('Nama Taiba Factory', 'مصنع نما طيبة')} 
                 className="w-full h-auto rounded-lg" 
               />
@@ -83,7 +89,7 @@ const AboutSection = () => {
                   {t('Our Vision', 'رؤيتنا')}
                 </h3>
                 <p className="text-gray-700 leading-relaxed md:leading-[1.8] text-base md:text-lg">
-                  {language === 'en' ? aboutData.vision.content_en : aboutData.vision.content_ar}
+                  {language === 'en' ? aboutInfo.vision.content_en : aboutInfo.vision.content_ar}
                 </p>
               </div>
               
@@ -93,7 +99,7 @@ const AboutSection = () => {
                   {t('Our Mission', 'مهمتنا')}
                 </h3>
                 <p className="text-gray-700 leading-relaxed md:leading-[1.8] text-base md:text-lg">
-                  {language === 'en' ? aboutData.mission.content_en : aboutData.mission.content_ar}
+                  {language === 'en' ? aboutInfo.mission.content_en : aboutInfo.mission.content_ar}
                 </p>
               </div>
               

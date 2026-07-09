@@ -48,40 +48,16 @@ const ServicesSection = () => {
     );
   }
 
-  // If no services loaded yet, show placeholder data
-  const displayServices = services.length > 0 ? services : [
-    {
-      id: '1',
-      titleEn: 'Custom Manufacturing',
-      titleAr: 'تصنيع مخصص',
-      descriptionEn: 'We provide custom manufacturing services for specific project needs.',
-      descriptionAr: 'نقدم خدمات تصنيع مخصصة لاحتياجات المشاريع المحددة.',
-      iconName: 'home'
-    },
-    {
-      id: '2',
-      titleEn: 'Construction Consultation',
-      titleAr: 'استشارات البناء',
-      descriptionEn: 'Expert advice on material selection and construction methods.',
-      descriptionAr: 'نصائح الخبراء بشأن اختيار المواد وطرق البناء.',
-      iconName: 'search'
-    },
-    {
-      id: '3',
-      titleEn: 'Material Testing',
-      titleAr: 'اختبار المواد',
-      descriptionEn: 'Rigorous testing of materials for quality assurance.',
-      descriptionAr: 'اختبار دقيق للمواد لضمان الجودة.',
-      iconName: 'user'
-    }
-  ];
+  if (services.length === 0) {
+    return null;
+  }
 
   return (
     <div className="bg-gray-50 py-16">
       <div className="container mx-auto px-4">
         <h2 className="section-title">{t('Our Services', 'خدماتنا')}</h2>
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-          {displayServices.map((service) => (
+          {services.map((service) => (
             <Card key={service.id} className="card-hover border-none shadow-lg">
               <CardHeader>
                 <div className="w-16 h-16 rounded-full bg-nama-purple flex items-center justify-center mb-4">

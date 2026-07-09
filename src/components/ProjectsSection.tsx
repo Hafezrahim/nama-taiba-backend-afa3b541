@@ -79,13 +79,11 @@ const ProjectsSection = () => {
     );
   }
 
-  const displayProjects = projects.length > 0 ? projects : [
-    { id: '1', titleEn: 'Riyadh Business Tower', titleAr: 'برج الأعمال بالرياض', descriptionEn: 'Supplied high-quality building materials for this iconic structure.', descriptionAr: 'قمنا بتوريد مواد بناء عالية الجودة لهذا المبنى الشهير.', image: 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b', date: '2023-06-15', location: 'Riyadh, Saudi Arabia' },
-    { id: '2', titleEn: 'Jeddah Residential Complex', titleAr: 'مجمع سكني بجدة', descriptionEn: 'Provided all necessary construction materials for this large residential project.', descriptionAr: 'قدمنا جميع مواد البناء اللازمة لهذا المشروع السكني الكبير.', image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6', date: '2022-04-22', location: 'Jeddah, Saudi Arabia' },
-    { id: '3', titleEn: 'Dammam Shopping Mall', titleAr: 'مركز تسوق الدمام', descriptionEn: 'Custom manufacturing of specialized materials for this commercial project.', descriptionAr: 'تصنيع مخصص للمواد المتخصصة لهذا المشروع التجاري.', image: 'https://images.unsplash.com/photo-1500673922987-e212871fec22', date: '2021-11-30', location: 'Dammam, Saudi Arabia' }
-  ];
+  if (!projects || projects.length === 0) {
+    return null;
+  }
 
-  const ProjectCard = ({ project }: { project: typeof displayProjects[0] }) => (
+  const ProjectCard = ({ project }: { project: Project }) => (
     <Card className="overflow-hidden card-hover h-full">
       <div className="h-64 overflow-hidden relative">
         <img
@@ -122,7 +120,7 @@ const ProjectsSection = () => {
       {isMobile ? (
         <Carousel opts={{ align: "start", direction: language === 'ar' ? 'rtl' : 'ltr' }} className="w-full">
           <CarouselContent>
-            {displayProjects.map((project) => (
+            {projects.map((project) => (
               <CarouselItem key={project.id} className="basis-[85%]">
                 <ProjectCard project={project} />
               </CarouselItem>
@@ -131,7 +129,7 @@ const ProjectsSection = () => {
         </Carousel>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {displayProjects.map((project) => (
+          {projects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>
