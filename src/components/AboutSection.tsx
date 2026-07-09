@@ -41,21 +41,27 @@ const AboutSection = () => {
     loadProfileUrl();
   }, []);
 
-  // Updated placeholder data with the new content if API data not loaded yet
-  const aboutData = aboutInfo || {
-    vision: { 
-      content_ar: 'رؤيتنا هي أن نكون المصنع الأول في المملكة للجودة والخدمات', 
-      content_en: 'Our vision is to be the top manufacturer in Saudi Arabia for quality' 
-    },
-    mission: { 
-      content_ar: 'تقديم منتجات بلوك بمعايير عالمية', 
-      content_en: 'Deliver block products with global standards' 
-    },
-    history: { 
-      content_ar: 'تأسس المصنع في 2016 في المدينة المنورة', 
-      content_en: 'Established in 2016 in Madinah' 
-    }
-  };
+  if (loading) {
+    return (
+      <div className="bg-gray-50 py-16">
+        <div className="container mx-auto px-4">
+          <h2 className="section-title">{t('About Nama Taiba', 'عن نما طيبة')}</h2>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="animate-pulse bg-gray-200 h-64 rounded-lg" />
+            <div className="space-y-6">
+              <div className="animate-pulse bg-gray-200 h-6 rounded w-3/4" />
+              <div className="animate-pulse bg-gray-200 h-4 rounded" />
+              <div className="animate-pulse bg-gray-200 h-4 rounded w-5/6" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!aboutInfo) {
+    return null;
+  }
 
   return (
     <div className="bg-gray-50 py-16">
