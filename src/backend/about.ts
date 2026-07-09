@@ -10,8 +10,7 @@ export const getAboutInfo = async (): Promise<AboutInfo | null> => {
   try {
     const { data, error } = await supabase
       .from('about_info')
-      .select('*')
-      .eq('is_active', true);
+      .select('*');
 
     if (error) throw error;
 
