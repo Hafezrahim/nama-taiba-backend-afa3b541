@@ -52,9 +52,10 @@ export default function AdminRoles() {
         (profiles || []).map(p => [p.id, p])
       );
 
-      const rolesWithProfiles = (data || []).map(r => ({
+      const rolesWithProfiles: UserRole[] = (data || []).map(r => ({
         ...r,
         profiles: profileMap.get(r.user_id) || undefined,
+        email: undefined as string | undefined,
       }));
 
       // Fetch emails securely via Postgres RPC
