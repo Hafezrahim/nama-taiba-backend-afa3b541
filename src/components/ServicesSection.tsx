@@ -48,33 +48,9 @@ const ServicesSection = () => {
     );
   }
 
-  // If no services loaded yet, show placeholder data
-  const displayServices = services.length > 0 ? services : [
-    {
-      id: '1',
-      titleEn: 'Custom Manufacturing',
-      titleAr: 'تصنيع مخصص',
-      descriptionEn: 'We provide custom manufacturing services for specific project needs.',
-      descriptionAr: 'نقدم خدمات تصنيع مخصصة لاحتياجات المشاريع المحددة.',
-      iconName: 'home'
-    },
-    {
-      id: '2',
-      titleEn: 'Construction Consultation',
-      titleAr: 'استشارات البناء',
-      descriptionEn: 'Expert advice on material selection and construction methods.',
-      descriptionAr: 'نصائح الخبراء بشأن اختيار المواد وطرق البناء.',
-      iconName: 'search'
-    },
-    {
-      id: '3',
-      titleEn: 'Material Testing',
-      titleAr: 'اختبار المواد',
-      descriptionEn: 'Rigorous testing of materials for quality assurance.',
-      descriptionAr: 'اختبار دقيق للمواد لضمان الجودة.',
-      iconName: 'user'
-    }
-  ];
+  if (services.length === 0) {
+    return null;
+  }
 
   return (
     <div className="bg-gray-50 py-16">
