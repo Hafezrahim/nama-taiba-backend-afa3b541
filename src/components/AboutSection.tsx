@@ -89,7 +89,7 @@ const AboutSection = () => {
                   {t('Our Vision', 'رؤيتنا')}
                 </h3>
                 <p className="text-gray-700 leading-relaxed md:leading-[1.8] text-base md:text-lg">
-                  {language === 'en' ? aboutData.vision.content_en : aboutData.vision.content_ar}
+                  {language === 'en' ? aboutInfo.vision.content_en : aboutInfo.vision.content_ar}
                 </p>
               </div>
               
