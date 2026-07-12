@@ -1068,6 +1068,42 @@ export type Database = {
         }
         Relationships: []
       }
+      quality_sections: {
+        Row: {
+          content_ar: string | null
+          content_en: string | null
+          created_at: string
+          display_order: number
+          id: string
+          is_active: boolean
+          title_ar: string
+          title_en: string
+          updated_at: string
+        }
+        Insert: {
+          content_ar?: string | null
+          content_en?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          title_ar: string
+          title_en: string
+          updated_at?: string
+        }
+        Update: {
+          content_ar?: string | null
+          content_en?: string | null
+          created_at?: string
+          display_order?: number
+          id?: string
+          is_active?: boolean
+          title_ar?: string
+          title_en?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       quote_requests: {
         Row: {
           admin_reply: string | null
