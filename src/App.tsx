@@ -70,6 +70,7 @@ const AdminSlider = lazy(() => import('./pages/admin/AdminSlider'));
 const AdminContactInfo = lazy(() => import('./pages/admin/AdminContactInfo'));
 const AdminRoles = lazy(() => import('./pages/admin/AdminRoles'));
 const AdminAbout = lazy(() => import('./pages/admin/AdminAbout'));
+const AdminQuality = lazy(() => import('./pages/admin/AdminQuality'));
 const AdminContacts = lazy(() => import('./pages/admin/AdminContacts'));
 const AdminQuotes = lazy(() => import('./pages/admin/AdminQuotes'));
 const AdminQuoteDetails = lazy(() => import('./pages/admin/AdminQuoteDetails'));
@@ -169,6 +170,7 @@ function App() {
                         <Route path="map-locations" element={<AdminMapLocations />} />
                         <Route path="roles" element={<AdminRoles />} />
                         <Route path="about" element={<AdminAbout />} />
+                        <Route path="quality" element={<AdminQuality />} />
                         <Route path="contacts" element={<AdminContacts />} />
                         <Route path="quotes" element={<AdminQuotes />} />
                         <Route path="quotes/:id" element={<AdminQuoteDetails />} />

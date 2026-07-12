@@ -110,6 +110,11 @@ const menuItems = [{
     titleAr: 'الشركاء',
     url: '/admin/partners',
     icon: Handshake
+  }, {
+    title: 'Quality',
+    titleAr: 'الجودة',
+    url: '/admin/quality',
+    icon: Shield
   }]
 }, {
   group: 'Communications',
