@@ -69,7 +69,7 @@ const Quality: React.FC = () => {
               <Skeleton className="h-40 w-full" />
             </div>
           ) : sections.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-16 items-stretch">
 
               {sections.map((s) => {
                 const title = language === 'ar' ? s.title_ar : s.title_en;
