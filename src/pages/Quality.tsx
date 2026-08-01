@@ -63,12 +63,14 @@ const Quality: React.FC = () => {
           </p>
 
           {sectionsLoading ? (
-            <div className="space-y-6 max-w-4xl mx-auto mb-16">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16">
+              <Skeleton className="h-40 w-full" />
               <Skeleton className="h-40 w-full" />
               <Skeleton className="h-40 w-full" />
             </div>
           ) : sections.length > 0 && (
-            <div className="max-w-4xl mx-auto space-y-12 mb-16">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16 items-start">
+
               {sections.map((s) => {
                 const title = language === 'ar' ? s.title_ar : s.title_en;
                 const content = language === 'ar' ? s.content_ar : s.content_en;
