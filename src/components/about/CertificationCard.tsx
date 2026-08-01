@@ -1,10 +1,8 @@
-
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
-import { Award, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { type Certification } from '@/backend/certifications';
-import { Badge } from '@/components/ui/badge';
 
 interface CertificationCardProps {
   certification: Certification;
@@ -14,71 +12,56 @@ const CertificationCard = ({ certification }: CertificationCardProps) => {
   const { language } = useLanguage();
   const [showImagePopup, setShowImagePopup] = useState(false);
 
-  const openImagePopup = () => {
-    setShowImagePopup(true);
-  };
-
-  const closeImagePopup = () => {
-    setShowImagePopup(false);
-  };
+  const name = language === 'en' ? certification.name_en : certification.name_ar;
+  const type = language === 'en' ? certification.type_en : certification.type_ar;
+  const issuedBy = language === 'en' ? certification.issued_by_en : certification.issued_by_ar;
 
   return (
     <>
-      <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" onClick={openImagePopup}>
+      <Card
+        className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+        onClick={() => certification.image && setShowImagePopup(true)}
+      >
         <CardContent className="p-0">
           {certification.image ? (
-            <div className="h-48 w-full bg-white flex items-center justify-center p-4">
-              <img 
-                src={certification.image} 
-                alt={language === 'en' ? certification.name_en : certification.name_ar}
+            <div className="h-48 w-full bg-background flex items-center justify-center p-4">
+              <img
+                src={certification.image}
+                alt={name}
+                loading="lazy"
                 className="max-w-full max-h-full object-contain hover:opacity-90 transition-opacity"
               />
             </div>
           ) : (
-            <div className="h-48 w-full bg-gray-100 flex items-center justify-center p-4 text-center">
-              <span className="text-lg font-semibold text-gray-500">
-                {language === 'en' ? certification.name_en : certification.name_ar}
-              </span>
+            <div className="h-48 w-full bg-muted flex items-center justify-center p-4 text-center">
+              <span className="text-lg font-semibold text-muted-foreground">{name}</span>
             </div>
           )}
         </CardContent>
       </Card>
 
-      {/* Image Popup */}
-      {showImagePopup && certification.image && (
-        <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75"
-          onClick={closeImagePopup}
-        >
-          <div className="relative max-w-4xl w-full p-4">
-            <button 
-              className="absolute top-0 right-0 bg-white rounded-full p-1 shadow-lg transform translate-x-1/2 -translate-y-1/2"
-              onClick={(e) => {
-                e.stopPropagation();
-                closeImagePopup();
-              }}
-            >
-              <X className="w-6 h-6" />
-            </button>
-            <img 
-              src={certification.image} 
-              alt={language === 'en' ? certification.name_en : certification.name_ar}
-              className="w-full h-auto max-h-[80vh] object-contain rounded-lg"
-            />
-            <div className="bg-white p-4 mt-2 rounded-lg">
-              <h3 className="text-xl font-semibold">
-                {language === 'en' ? certification.name_en : certification.name_ar}
-              </h3>
-              <p className="text-gray-600">
-                {language === 'en' ? certification.type_en : certification.type_ar}
-              </p>
-              <p className="text-nama-purple font-medium">
-                {language === 'en' ? certification.issued_by_en : certification.issued_by_ar}
-              </p>
-            </div>
+      <Dialog open={showImagePopup} onOpenChange={setShowImagePopup}>
+        <DialogContent className="max-w-[96vw] w-[96vw] sm:max-w-[92vw] h-[92vh] p-0 overflow-hidden flex flex-col bg-background">
+          <DialogTitle className="sr-only">{name}</DialogTitle>
+          <DialogDescription className="sr-only">{type}</DialogDescription>
+
+          <div className="flex-1 min-h-0 flex items-center justify-center bg-muted/40 p-4">
+            {certification.image && (
+              <img
+                src={certification.image}
+                alt={name}
+                className="max-w-full max-h-full object-contain"
+              />
+            )}
           </div>
-        </div>
-      )}
+
+          <div className="border-t p-4 shrink-0">
+            <h3 className="text-xl font-semibold">{name}</h3>
+            {type && <p className="text-muted-foreground">{type}</p>}
+            {issuedBy && <p className="text-nama-purple font-medium">{issuedBy}</p>}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
