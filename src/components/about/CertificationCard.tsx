@@ -41,25 +41,26 @@ const CertificationCard = ({ certification }: CertificationCardProps) => {
       </Card>
 
       <Dialog open={showImagePopup} onOpenChange={setShowImagePopup}>
-        <DialogContent className="max-w-[96vw] w-[96vw] sm:max-w-[92vw] h-[92vh] p-0 overflow-hidden flex flex-col bg-background">
+        <DialogContent className="w-[100vw] max-w-[100vw] h-[100dvh] sm:w-[94vw] sm:max-w-[94vw] sm:h-[92vh] rounded-none sm:rounded-lg p-0 overflow-hidden flex flex-col bg-background">
           <DialogTitle className="sr-only">{name}</DialogTitle>
           <DialogDescription className="sr-only">{type}</DialogDescription>
 
-          <div className="flex-1 min-h-0 flex items-center justify-center bg-muted/40 p-4">
+          <div className="flex-1 min-h-0 flex items-center justify-center bg-muted/40 p-2 sm:p-6">
             {certification.image && (
               <img
                 src={certification.image}
                 alt={name}
-                className="max-w-full max-h-full object-contain"
+                className="max-w-full max-h-full w-auto h-auto object-contain"
               />
             )}
           </div>
 
-          <div className="border-t p-4 shrink-0">
-            <h3 className="text-xl font-semibold">{name}</h3>
-            {type && <p className="text-muted-foreground">{type}</p>}
-            {issuedBy && <p className="text-nama-purple font-medium">{issuedBy}</p>}
+          <div className="border-t p-3 sm:p-4 shrink-0 max-h-[35dvh] overflow-y-auto">
+            <h3 className="text-base sm:text-xl font-semibold break-words">{name}</h3>
+            {type && <p className="text-sm sm:text-base text-muted-foreground break-words">{type}</p>}
+            {issuedBy && <p className="text-sm sm:text-base text-nama-purple font-medium break-words">{issuedBy}</p>}
           </div>
+
         </DialogContent>
       </Dialog>
     </>
