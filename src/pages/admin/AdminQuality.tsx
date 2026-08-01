@@ -94,6 +94,26 @@ export default function AdminQuality() {
     onError: (e: any) => toast.error(e.message),
   });
 
+  const duplicateMutation = useMutation({
+    mutationFn: async (row: QualitySection) => {
+      const { error } = await supabase.from('quality_sections').insert([{
+        title_en: `${row.title_en} (Copy)`,
+        title_ar: `${row.title_ar} (نسخة)`,
+        content_en: row.content_en,
+        content_ar: row.content_ar,
+        display_order: row.display_order,
+        is_active: false,
+      }]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-quality-sections'] });
+      qc.invalidateQueries({ queryKey: ['quality-sections'] });
+      toast.success(t('Duplicated successfully', 'تم النسخ بنجاح'));
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
   const toggleActive = async (row: QualitySection) => {
     const { error } = await supabase
       .from('quality_sections')
