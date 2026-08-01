@@ -69,17 +69,18 @@ const Quality: React.FC = () => {
               <Skeleton className="h-40 w-full" />
             </div>
           ) : sections.length > 0 && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-16 items-stretch">
 
               {sections.map((s) => {
                 const title = language === 'ar' ? s.title_ar : s.title_en;
                 const content = language === 'ar' ? s.content_ar : s.content_en;
                 return (
-                  <article key={s.id} className="bg-card border rounded-xl p-6 md:p-8 shadow-sm">
-                    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-foreground">{title}</h2>
+                  <article key={s.id} className="h-full flex flex-col bg-card border rounded-xl p-6 shadow-sm">
+                    <h2 className="text-xl md:text-2xl font-bold mb-4 text-foreground">{title}</h2>
                     {content && (
                       <div
-                        className="prose prose-lg max-w-none dark:prose-invert prose-img:rounded-lg prose-img:mx-auto prose-headings:text-foreground prose-p:text-foreground/90 leading-relaxed"
+                        className="prose prose-sm md:prose-base max-w-none dark:prose-invert prose-img:rounded-lg prose-img:mx-auto prose-headings:text-foreground prose-p:text-foreground/90 leading-relaxed break-words"
+
                         dir={isRTL ? 'rtl' : 'ltr'}
                         dangerouslySetInnerHTML={{ __html: content }}
                       />

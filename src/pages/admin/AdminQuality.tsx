@@ -17,7 +17,7 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface QualitySection {
@@ -90,6 +90,26 @@ export default function AdminQuality() {
       qc.invalidateQueries({ queryKey: ['quality-sections'] });
       toast.success(t('Deleted successfully', 'تم الحذف بنجاح'));
       setDeleteId(null);
+    },
+    onError: (e: any) => toast.error(e.message),
+  });
+
+  const duplicateMutation = useMutation({
+    mutationFn: async (row: QualitySection) => {
+      const { error } = await supabase.from('quality_sections').insert([{
+        title_en: `${row.title_en} (Copy)`,
+        title_ar: `${row.title_ar} (نسخة)`,
+        content_en: row.content_en,
+        content_ar: row.content_ar,
+        display_order: row.display_order,
+        is_active: false,
+      }]);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-quality-sections'] });
+      qc.invalidateQueries({ queryKey: ['quality-sections'] });
+      toast.success(t('Duplicated successfully', 'تم النسخ بنجاح'));
     },
     onError: (e: any) => toast.error(e.message),
   });
@@ -250,9 +270,20 @@ export default function AdminQuality() {
                       <Button variant="outline" size="sm" onClick={() => openEdit(row)}>
                         <Edit className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title={t('Duplicate', 'نسخ')}
+                        aria-label={t('Duplicate', 'نسخ')}
+                        disabled={duplicateMutation.isPending}
+                        onClick={() => duplicateMutation.mutate(row)}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                       <Button variant="destructive" size="sm" onClick={() => setDeleteId(row.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
+
                     </div>
                   </TableCell>
                 </TableRow>
