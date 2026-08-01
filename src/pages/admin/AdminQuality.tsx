@@ -270,9 +270,20 @@ export default function AdminQuality() {
                       <Button variant="outline" size="sm" onClick={() => openEdit(row)}>
                         <Edit className="h-4 w-4" />
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        title={t('Duplicate', 'نسخ')}
+                        aria-label={t('Duplicate', 'نسخ')}
+                        disabled={duplicateMutation.isPending}
+                        onClick={() => duplicateMutation.mutate(row)}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                       <Button variant="destructive" size="sm" onClick={() => setDeleteId(row.id)}>
                         <Trash2 className="h-4 w-4" />
                       </Button>
+
                     </div>
                   </TableCell>
                 </TableRow>
