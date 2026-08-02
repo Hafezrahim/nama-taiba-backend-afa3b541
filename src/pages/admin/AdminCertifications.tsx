@@ -163,10 +163,40 @@ export default function AdminCertifications() {
                 </div>
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="image">{t('Image URL', 'رابط الصورة')}</Label>
-                <Input id="image" name="image" type="url" defaultValue={editingCert?.image} />
+                <Input
+                  id="image"
+                  name="image"
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                />
+                <div className="flex items-center gap-3">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    disabled={uploading}
+                    onChange={handleFileUpload}
+                    className="max-w-xs"
+                  />
+                  {uploading && (
+                    <span className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {t('Uploading...', 'جاري الرفع...')}
+                    </span>
+                  )}
+                </div>
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt={t('Preview', 'معاينة')}
+                    loading="lazy"
+                    className="h-24 w-auto rounded border object-contain bg-background"
+                  />
+                )}
               </div>
+
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
