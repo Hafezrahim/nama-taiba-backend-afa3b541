@@ -16,8 +16,35 @@ export default function AdminCertifications() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCert, setEditingCert] = useState<any>(null);
+  const [imageUrl, setImageUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 15;
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(t('File must be under 5MB', 'يجب أن يكون الملف أقل من 5 ميجابايت'));
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `certifications/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from('documents').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from('documents').getPublicUrl(path);
+      setImageUrl(data.publicUrl);
+      toast.success(t('Image uploaded', 'تم رفع الصورة'));
+    } catch {
+      toast.error(t('Failed to upload image', 'فشل رفع الصورة'));
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
 
   const { data: certifications = [], isLoading } = useQuery({
     queryKey: ['admin-certifications'],
