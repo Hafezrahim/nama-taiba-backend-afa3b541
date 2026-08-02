@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import AdminTablePagination from '@/components/admin/AdminTablePagination';
 
@@ -16,8 +16,35 @@ export default function AdminCertifications() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingCert, setEditingCert] = useState<any>(null);
+  const [imageUrl, setImageUrl] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 15;
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(t('File must be under 5MB', 'يجب أن يكون الملف أقل من 5 ميجابايت'));
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `certifications/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from('documents').upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from('documents').getPublicUrl(path);
+      setImageUrl(data.publicUrl);
+      toast.success(t('Image uploaded', 'تم رفع الصورة'));
+    } catch {
+      toast.error(t('Failed to upload image', 'فشل رفع الصورة'));
+    } finally {
+      setUploading(false);
+      e.target.value = '';
+    }
+  };
+
 
   const { data: certifications = [], isLoading } = useQuery({
     queryKey: ['admin-certifications'],
@@ -81,7 +108,7 @@ export default function AdminCertifications() {
       type_ar: formData.get('type_ar') as string,
       issued_by_en: formData.get('issued_by_en') as string,
       issued_by_ar: formData.get('issued_by_ar') as string,
-      image: formData.get('image') as string,
+      image: imageUrl,
       issued_date: formData.get('issued_date') as string || null,
       display_order: parseInt(formData.get('display_order') as string) || 0,
     };
@@ -100,7 +127,9 @@ export default function AdminCertifications() {
 
   const handleEdit = (cert: any) => {
     setEditingCert(cert);
+    setImageUrl(cert?.image || '');
     setIsDialogOpen(true);
+
   };
 
   const handleDelete = (id: string) => {
@@ -115,7 +144,7 @@ export default function AdminCertifications() {
         <h1 className="text-3xl font-bold">{t('Certifications Management', 'إدارة الشهادات')}</h1>
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
-          if (!open) setEditingCert(null);
+          if (!open) { setEditingCert(null); setImageUrl(''); }
         }}>
           <DialogTrigger asChild>
             <Button>
@@ -163,10 +192,40 @@ export default function AdminCertifications() {
                 </div>
               </div>
 
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="image">{t('Image URL', 'رابط الصورة')}</Label>
-                <Input id="image" name="image" type="url" defaultValue={editingCert?.image} />
+                <Input
+                  id="image"
+                  name="image"
+                  type="url"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                />
+                <div className="flex items-center gap-3">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    disabled={uploading}
+                    onChange={handleFileUpload}
+                    className="max-w-xs"
+                  />
+                  {uploading && (
+                    <span className="text-sm text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      {t('Uploading...', 'جاري الرفع...')}
+                    </span>
+                  )}
+                </div>
+                {imageUrl && (
+                  <img
+                    src={imageUrl}
+                    alt={t('Preview', 'معاينة')}
+                    loading="lazy"
+                    className="h-24 w-auto rounded border object-contain bg-background"
+                  />
+                )}
               </div>
+
 
               <div className="grid grid-cols-2 gap-4">
                 <div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Skeleton } from '@/components/ui/skeleton';
 import { type Certification } from '@/backend/certifications';
 
 interface CertificationCardProps {
@@ -11,6 +12,13 @@ interface CertificationCardProps {
 const CertificationCard = ({ certification }: CertificationCardProps) => {
   const { language } = useLanguage();
   const [showImagePopup, setShowImagePopup] = useState(false);
+  const [fullLoaded, setFullLoaded] = useState(false);
+
+  const prefetch = () => {
+    if (!certification.image || fullLoaded) return;
+    const img = new Image();
+    img.src = certification.image;
+  };
 
   const name = language === 'en' ? certification.name_en : certification.name_ar;
   const type = language === 'en' ? certification.type_en : certification.type_ar;
@@ -20,6 +28,8 @@ const CertificationCard = ({ certification }: CertificationCardProps) => {
     <>
       <Card
         className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+        onMouseEnter={prefetch}
+        onTouchStart={prefetch}
         onClick={() => certification.image && setShowImagePopup(true)}
       >
         <CardContent className="p-0">
@@ -29,6 +39,7 @@ const CertificationCard = ({ certification }: CertificationCardProps) => {
                 src={certification.image}
                 alt={name}
                 loading="lazy"
+                decoding="async"
                 className="max-w-full max-h-full object-contain hover:opacity-90 transition-opacity"
               />
             </div>
@@ -45,15 +56,22 @@ const CertificationCard = ({ certification }: CertificationCardProps) => {
           <DialogTitle className="sr-only">{name}</DialogTitle>
           <DialogDescription className="sr-only">{type}</DialogDescription>
 
-          <div className="flex-1 min-h-0 flex items-center justify-center bg-muted/40 p-2 sm:p-6">
-            {certification.image && (
-              <img
-                src={certification.image}
-                alt={name}
-                className="max-w-full max-h-full w-auto h-auto object-contain"
-              />
+          <div className="relative flex-1 min-h-0 flex items-center justify-center bg-muted/40 p-2 sm:p-6">
+            {showImagePopup && certification.image && (
+              <>
+                {!fullLoaded && <Skeleton className="absolute inset-4 sm:inset-10 rounded-md" />}
+                <img
+                  src={certification.image}
+                  alt={name}
+                  decoding="async"
+                  fetchPriority="high"
+                  onLoad={() => setFullLoaded(true)}
+                  className={`max-w-full max-h-full w-auto h-auto object-contain transition-opacity duration-200 ${fullLoaded ? 'opacity-100' : 'opacity-0'}`}
+                />
+              </>
             )}
           </div>
+
 
           <div className="border-t p-3 sm:p-4 shrink-0 max-h-[35dvh] overflow-y-auto">
             <h3 className="text-base sm:text-xl font-semibold break-words">{name}</h3>
