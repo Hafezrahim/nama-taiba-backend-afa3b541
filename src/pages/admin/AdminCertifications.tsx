@@ -264,8 +264,21 @@ export default function AdminCertifications() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {certifications.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((cert) => (
-                  <TableRow key={cert.id}>
+                {rows.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((cert, i) => {
+                  const index = (currentPage - 1) * rowsPerPage + i;
+                  return (
+                  <TableRow
+                    key={cert.id}
+                    draggable
+                    onDragStart={() => setDragIndex(index)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => handleDrop(index)}
+                    onDragEnd={() => setDragIndex(null)}
+                    className={dragIndex === index ? 'opacity-50 cursor-grabbing' : 'cursor-grab'}
+                  >
+                    <TableCell>
+                      <GripVertical className="h-4 w-4 text-muted-foreground" aria-hidden />
+                    </TableCell>
                     <TableCell>{cert.image && <img src={cert.image} alt={cert.name_en} className="h-12 w-auto" />}</TableCell>
                     <TableCell>{cert.name_en}</TableCell>
                     <TableCell>{cert.name_ar}</TableCell>
@@ -283,8 +296,10 @@ export default function AdminCertifications() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
+
             </Table>
           </div>
           <AdminTablePagination currentPage={currentPage} totalPages={Math.ceil(certifications.length / rowsPerPage)} onPageChange={setCurrentPage} totalItems={certifications.length} itemsPerPage={rowsPerPage} />
