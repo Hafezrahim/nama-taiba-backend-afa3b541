@@ -90,6 +90,12 @@ export default function AdminCertifications() {
     },
   });
 
+  useEffect(() => {
+    setRows(certifications as any[]);
+  }, [certifications]);
+
+
+
   const createMutation = useMutation({
     mutationFn: async (formData: any) => {
       const { error } = await supabase.from('certifications').insert([formData]);
