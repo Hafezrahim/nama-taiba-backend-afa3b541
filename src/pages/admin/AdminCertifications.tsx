@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, GripVertical } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import AdminTablePagination from '@/components/admin/AdminTablePagination';
 
@@ -19,7 +19,39 @@ export default function AdminCertifications() {
   const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [rows, setRows] = useState<any[]>([]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const rowsPerPage = 15;
+
+  const reorderMutation = useMutation({
+    mutationFn: async (ordered: any[]) => {
+      await Promise.all(
+        ordered.map((row, i) =>
+          supabase.from('certifications').update({ display_order: i + 1 }).eq('id', row.id)
+        )
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-certifications'] });
+      toast.success(t('Order saved', 'تم حفظ الترتيب'));
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-certifications'] });
+      toast.error(t('Failed to save order', 'فشل حفظ الترتيب'));
+    },
+  });
+
+  const handleDrop = (targetIndex: number) => {
+    if (dragIndex === null || dragIndex === targetIndex) return;
+    const next = [...rows];
+    const [moved] = next.splice(dragIndex, 1);
+    next.splice(targetIndex, 0, moved);
+    const withOrder = next.map((r, i) => ({ ...r, display_order: i + 1 }));
+    setRows(withOrder);
+    setDragIndex(null);
+    reorderMutation.mutate(withOrder);
+  };
+
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -57,6 +89,12 @@ export default function AdminCertifications() {
       return data;
     },
   });
+
+  useEffect(() => {
+    setRows(certifications as any[]);
+  }, [certifications]);
+
+
 
   const createMutation = useMutation({
     mutationFn: async (formData: any) => {
@@ -254,6 +292,7 @@ export default function AdminCertifications() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-8"><span className="sr-only">{t('Reorder', 'إعادة الترتيب')}</span></TableHead>
                   <TableHead>{t('Image', 'الصورة')}</TableHead>
                   <TableHead>{t('Name (EN)', 'الاسم (EN)')}</TableHead>
                   <TableHead>{t('Name (AR)', 'الاسم (AR)')}</TableHead>
@@ -264,8 +303,21 @@ export default function AdminCertifications() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {certifications.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((cert) => (
-                  <TableRow key={cert.id}>
+                {rows.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage).map((cert, i) => {
+                  const index = (currentPage - 1) * rowsPerPage + i;
+                  return (
+                  <TableRow
+                    key={cert.id}
+                    draggable
+                    onDragStart={() => setDragIndex(index)}
+                    onDragOver={(e) => e.preventDefault()}
+                    onDrop={() => handleDrop(index)}
+                    onDragEnd={() => setDragIndex(null)}
+                    className={dragIndex === index ? 'opacity-50 cursor-grabbing' : 'cursor-grab'}
+                  >
+                    <TableCell>
+                      <GripVertical className="h-4 w-4 text-muted-foreground" aria-hidden />
+                    </TableCell>
                     <TableCell>{cert.image && <img src={cert.image} alt={cert.name_en} className="h-12 w-auto" />}</TableCell>
                     <TableCell>{cert.name_en}</TableCell>
                     <TableCell>{cert.name_ar}</TableCell>
@@ -283,8 +335,10 @@ export default function AdminCertifications() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
+
             </Table>
           </div>
           <AdminTablePagination currentPage={currentPage} totalPages={Math.ceil(certifications.length / rowsPerPage)} onPageChange={setCurrentPage} totalItems={certifications.length} itemsPerPage={rowsPerPage} />
