@@ -127,7 +127,9 @@ export default function AdminCertifications() {
 
   const handleEdit = (cert: any) => {
     setEditingCert(cert);
+    setImageUrl(cert?.image || '');
     setIsDialogOpen(true);
+
   };
 
   const handleDelete = (id: string) => {
