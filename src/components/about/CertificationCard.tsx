@@ -56,7 +56,7 @@ const CertificationCard = ({ certification }: CertificationCardProps) => {
           <DialogTitle className="sr-only">{name}</DialogTitle>
           <DialogDescription className="sr-only">{type}</DialogDescription>
 
-          <div className="flex-1 min-h-0 flex items-center justify-center bg-muted/40 p-2 sm:p-6">
+          <div className="relative flex-1 min-h-0 flex items-center justify-center bg-muted/40 p-2 sm:p-6">
             {showImagePopup && certification.image && (
               <>
                 {!fullLoaded && <Skeleton className="absolute inset-4 sm:inset-10 rounded-md" />}
