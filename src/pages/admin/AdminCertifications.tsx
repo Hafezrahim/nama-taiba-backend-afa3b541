@@ -108,7 +108,7 @@ export default function AdminCertifications() {
       type_ar: formData.get('type_ar') as string,
       issued_by_en: formData.get('issued_by_en') as string,
       issued_by_ar: formData.get('issued_by_ar') as string,
-      image: formData.get('image') as string,
+      image: imageUrl,
       issued_date: formData.get('issued_date') as string || null,
       display_order: parseInt(formData.get('display_order') as string) || 0,
     };
