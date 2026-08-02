@@ -19,7 +19,39 @@ export default function AdminCertifications() {
   const [imageUrl, setImageUrl] = useState('');
   const [uploading, setUploading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [rows, setRows] = useState<any[]>([]);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
   const rowsPerPage = 15;
+
+  const reorderMutation = useMutation({
+    mutationFn: async (ordered: any[]) => {
+      await Promise.all(
+        ordered.map((row, i) =>
+          supabase.from('certifications').update({ display_order: i + 1 }).eq('id', row.id)
+        )
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-certifications'] });
+      toast.success(t('Order saved', 'تم حفظ الترتيب'));
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-certifications'] });
+      toast.error(t('Failed to save order', 'فشل حفظ الترتيب'));
+    },
+  });
+
+  const handleDrop = (targetIndex: number) => {
+    if (dragIndex === null || dragIndex === targetIndex) return;
+    const next = [...rows];
+    const [moved] = next.splice(dragIndex, 1);
+    next.splice(targetIndex, 0, moved);
+    const withOrder = next.map((r, i) => ({ ...r, display_order: i + 1 }));
+    setRows(withOrder);
+    setDragIndex(null);
+    reorderMutation.mutate(withOrder);
+  };
+
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
