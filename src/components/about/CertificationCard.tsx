@@ -27,6 +27,8 @@ const CertificationCard = ({ certification }: CertificationCardProps) => {
     <>
       <Card
         className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+        onMouseEnter={prefetch}
+        onTouchStart={prefetch}
         onClick={() => certification.image && setShowImagePopup(true)}
       >
         <CardContent className="p-0">
@@ -36,6 +38,7 @@ const CertificationCard = ({ certification }: CertificationCardProps) => {
                 src={certification.image}
                 alt={name}
                 loading="lazy"
+                decoding="async"
                 className="max-w-full max-h-full object-contain hover:opacity-90 transition-opacity"
               />
             </div>
@@ -53,14 +56,21 @@ const CertificationCard = ({ certification }: CertificationCardProps) => {
           <DialogDescription className="sr-only">{type}</DialogDescription>
 
           <div className="flex-1 min-h-0 flex items-center justify-center bg-muted/40 p-2 sm:p-6">
-            {certification.image && (
-              <img
-                src={certification.image}
-                alt={name}
-                className="max-w-full max-h-full w-auto h-auto object-contain"
-              />
+            {showImagePopup && certification.image && (
+              <>
+                {!fullLoaded && <Skeleton className="absolute inset-4 sm:inset-10 rounded-md" />}
+                <img
+                  src={certification.image}
+                  alt={name}
+                  decoding="async"
+                  fetchPriority="high"
+                  onLoad={() => setFullLoaded(true)}
+                  className={`max-w-full max-h-full w-auto h-auto object-contain transition-opacity duration-200 ${fullLoaded ? 'opacity-100' : 'opacity-0'}`}
+                />
+              </>
             )}
           </div>
+
 
           <div className="border-t p-3 sm:p-4 shrink-0 max-h-[35dvh] overflow-y-auto">
             <h3 className="text-base sm:text-xl font-semibold break-words">{name}</h3>
