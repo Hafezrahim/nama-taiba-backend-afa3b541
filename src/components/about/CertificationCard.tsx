@@ -11,6 +11,13 @@ interface CertificationCardProps {
 const CertificationCard = ({ certification }: CertificationCardProps) => {
   const { language } = useLanguage();
   const [showImagePopup, setShowImagePopup] = useState(false);
+  const [fullLoaded, setFullLoaded] = useState(false);
+
+  const prefetch = () => {
+    if (!certification.image || fullLoaded) return;
+    const img = new Image();
+    img.src = certification.image;
+  };
 
   const name = language === 'en' ? certification.name_en : certification.name_ar;
   const type = language === 'en' ? certification.type_en : certification.type_ar;
