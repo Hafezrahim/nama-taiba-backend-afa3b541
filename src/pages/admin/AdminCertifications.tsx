@@ -144,7 +144,7 @@ export default function AdminCertifications() {
         <h1 className="text-3xl font-bold">{t('Certifications Management', 'إدارة الشهادات')}</h1>
         <Dialog open={isDialogOpen} onOpenChange={(open) => {
           setIsDialogOpen(open);
-          if (!open) setEditingCert(null);
+          if (!open) { setEditingCert(null); setImageUrl(''); }
         }}>
           <DialogTrigger asChild>
             <Button>
