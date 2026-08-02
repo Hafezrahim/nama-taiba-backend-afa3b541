@@ -292,6 +292,7 @@ export default function AdminCertifications() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-8"><span className="sr-only">{t('Reorder', 'إعادة الترتيب')}</span></TableHead>
                   <TableHead>{t('Image', 'الصورة')}</TableHead>
                   <TableHead>{t('Name (EN)', 'الاسم (EN)')}</TableHead>
                   <TableHead>{t('Name (AR)', 'الاسم (AR)')}</TableHead>
