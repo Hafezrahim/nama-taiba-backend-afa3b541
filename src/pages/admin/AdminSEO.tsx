@@ -84,15 +84,20 @@ export default function AdminSEO() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:w-[800px] h-auto p-1 bg-muted/50">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 lg:w-[1000px] h-auto p-1 bg-muted/50">
           <TabsTrigger value="global" className="flex items-center gap-2 py-2.5">
             <Globe className="h-4 w-4" />
             <span>{t('Global Meta & Settings', 'العلامات الوصفية والإعدادات')}</span>
+          </TabsTrigger>
+          <TabsTrigger value="keywords" className="flex items-center gap-2 py-2.5">
+            <Tags className="h-4 w-4" />
+            <span>{t('Keywords', 'الكلمات المفتاحية')}</span>
           </TabsTrigger>
           <TabsTrigger value="products" className="flex items-center gap-2 py-2.5">
             <Package className="h-4 w-4" />
             <span>{t('Product SEO', 'سيو المنتجات')}</span>
           </TabsTrigger>
+
           <TabsTrigger value="tools" className="flex items-center gap-2 py-2.5">
             <Search className="h-4 w-4" />
             <span>{t('Advanced SEO Tools', 'أدوات السيو المتقدمة')}</span>
