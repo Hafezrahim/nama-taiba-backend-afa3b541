@@ -7,6 +7,7 @@ import { getProducts } from '@/backend/products';
 import ProductFilters from '@/components/product/ProductFilters';
 import ProductList from '@/components/product/ProductList';
 import SEO from '@/components/SEO';
+import { smartIncludes, suggestCorrection } from '@/lib/smartSearch';
 
 const Products = () => {
   const { t, isRTL } = useLanguage();
