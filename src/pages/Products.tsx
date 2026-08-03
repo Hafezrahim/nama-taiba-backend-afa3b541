@@ -76,7 +76,22 @@ const Products = () => {
             setSizeFilter={setSizeFilter}
             setSearchQuery={setSearchQuery}
           />
-          
+
+          {suggestion && (
+            <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm">
+              {t('Did you mean', 'هل تقصد')}{' '}
+              <button
+                type="button"
+                onClick={() => setSearchQuery(suggestion.suggestion)}
+                className="font-semibold text-primary underline underline-offset-4 hover:opacity-80"
+              >
+                {suggestion.suggestion}
+              </button>
+              {t('?', '؟')}
+            </div>
+          )}
+
+
           <ProductList 
             products={filteredProducts}
             isLoading={isLoading}
