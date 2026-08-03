@@ -88,6 +88,9 @@ export default function AdminCertifications() {
       if (error) throw error;
       return data;
     },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -318,7 +321,19 @@ export default function AdminCertifications() {
                     <TableCell>
                       <GripVertical className="h-4 w-4 text-muted-foreground" aria-hidden />
                     </TableCell>
-                    <TableCell>{cert.image && <img src={cert.image} alt={cert.name_en} className="h-12 w-auto" />}</TableCell>
+                    <TableCell>
+                      {cert.image && (
+                        <img
+                          src={cert.image}
+                          alt={cert.name_en}
+                          loading="lazy"
+                          decoding="async"
+                          width={96}
+                          height={48}
+                          className="h-12 w-auto object-contain bg-background"
+                        />
+                      )}
+                    </TableCell>
                     <TableCell>{cert.name_en}</TableCell>
                     <TableCell>{cert.name_ar}</TableCell>
                     <TableCell>{cert.type_en}</TableCell>
