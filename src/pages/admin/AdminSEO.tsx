@@ -387,6 +387,24 @@ export default function AdminSEO() {
           </form>
         </TabsContent>
 
+        {/* Keywords Tab */}
+        <TabsContent value="keywords" className="pb-12 space-y-6">
+          <SeoKeywordsManager
+            keywordsEn={seoForm.seo_keywords_en || seoForm.seo_keywords || ''}
+            keywordsAr={seoForm.seo_keywords_ar || seoForm.seo_keywords || ''}
+            extraTerms={productTerms}
+            onChange={({ en, ar }) => setSeoForm(p => ({ ...p, seo_keywords_en: en, seo_keywords_ar: ar }))}
+          />
+          <div className="flex justify-end">
+            <Button onClick={() => seoMutation.mutate(seoForm)} disabled={seoMutation.isPending} size="lg" className="px-8">
+              {seoMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <CheckCircle2 className="mr-2 h-5 w-5" />
+              {t('Save Keywords', 'حفظ الكلمات المفتاحية')}
+            </Button>
+          </div>
+        </TabsContent>
+
+
         {/* Product SEO Tab */}
         <TabsContent value="products" className="pb-12">
           <ProductSeoTable />
