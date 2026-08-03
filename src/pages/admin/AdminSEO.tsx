@@ -9,10 +9,11 @@ import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Globe, Search, Code, CheckCircle2, Package } from 'lucide-react';
+import { Loader2, Globe, Search, Code, CheckCircle2, Package, Tags } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import SeoIndexingTools from '@/components/admin/seo/SeoIndexingTools';
 import ProductSeoTable from '@/components/admin/seo/ProductSeoTable';
+import SeoKeywordsManager from '@/components/admin/seo/SeoKeywordsManager';
 
 export default function AdminSEO() {
   const { t } = useLanguage();
