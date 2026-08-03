@@ -25,17 +25,28 @@ const Products = () => {
   const categories = products ? ['all', ...new Set(products.map(product => product.category))] : ['all'];
   const sizes = products ? ['all', ...new Set(products.map(product => product.size))] : ['all'];
 
-  // Filter products based on selected filters
+  // Filter products based on selected filters (typo & keyboard-layout tolerant)
   const filteredProducts = products?.filter(product => {
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
     const matchesSize = sizeFilter === 'all' || product.size === sizeFilter;
-    const matchesSearch = searchQuery === '' || 
-                         (product.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          product.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          product.keywords.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+    const matchesSearch = searchQuery.trim() === '' ||
+      smartIncludes(`${product.nameEn} ${product.nameAr} ${product.keywords || ''}`, searchQuery);
+
     return matchesCategory && matchesSize && matchesSearch;
   });
+
+  // Build a dictionary of known terms to power "Did you mean ...?"
+  const dictionary = (products || []).flatMap(p =>
+    [p.nameEn, p.nameAr, ...String(p.keywords || '').split(/[,،]/)]
+      .map(s => (s || '').trim())
+      .filter(Boolean)
+  );
+
+  const suggestion =
+    searchQuery.trim().length > 1 && (filteredProducts?.length ?? 0) === 0
+      ? suggestCorrection(searchQuery, dictionary)
+      : null;
+
 
   return (
     <div className={isRTL ? 'rtl' : 'ltr'}>
