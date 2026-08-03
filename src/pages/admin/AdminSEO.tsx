@@ -33,6 +33,23 @@ export default function AdminSEO() {
     },
   });
 
+  const { data: productTerms = [] } = useQuery({
+    queryKey: ['seo-product-terms'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('name_en, name_ar, keywords')
+        .limit(300);
+      if (error) throw error;
+      return (data || []).flatMap((p: any) =>
+        [p.name_en, p.name_ar, ...String(p.keywords || '').split(/[,،]/)]
+          .map((s: string) => (s || '').trim())
+          .filter(Boolean)
+      );
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+
   const [seoForm, setSeoForm] = useState<Record<string, string>>({});
 
   useEffect(() => {
