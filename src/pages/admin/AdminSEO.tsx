@@ -9,10 +9,11 @@ import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Globe, Search, Code, CheckCircle2, Package } from 'lucide-react';
+import { Loader2, Globe, Search, Code, CheckCircle2, Package, Tags } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import SeoIndexingTools from '@/components/admin/seo/SeoIndexingTools';
 import ProductSeoTable from '@/components/admin/seo/ProductSeoTable';
+import SeoKeywordsManager from '@/components/admin/seo/SeoKeywordsManager';
 
 export default function AdminSEO() {
   const { t } = useLanguage();
@@ -30,6 +31,23 @@ export default function AdminSEO() {
       (data as any[])?.forEach((row: any) => { map[row.setting_key] = row.setting_value || ''; });
       return map;
     },
+  });
+
+  const { data: productTerms = [] } = useQuery({
+    queryKey: ['seo-product-terms'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('products')
+        .select('name_en, name_ar, keywords')
+        .limit(300);
+      if (error) throw error;
+      return (data || []).flatMap((p: any) =>
+        [p.name_en, p.name_ar, ...String(p.keywords || '').split(/[,،]/)]
+          .map((s: string) => (s || '').trim())
+          .filter(Boolean)
+      );
+    },
+    staleTime: 5 * 60 * 1000,
   });
 
   const [seoForm, setSeoForm] = useState<Record<string, string>>({});
@@ -83,15 +101,20 @@ export default function AdminSEO() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 lg:w-[800px] h-auto p-1 bg-muted/50">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 lg:w-[1000px] h-auto p-1 bg-muted/50">
           <TabsTrigger value="global" className="flex items-center gap-2 py-2.5">
             <Globe className="h-4 w-4" />
             <span>{t('Global Meta & Settings', 'العلامات الوصفية والإعدادات')}</span>
+          </TabsTrigger>
+          <TabsTrigger value="keywords" className="flex items-center gap-2 py-2.5">
+            <Tags className="h-4 w-4" />
+            <span>{t('Keywords', 'الكلمات المفتاحية')}</span>
           </TabsTrigger>
           <TabsTrigger value="products" className="flex items-center gap-2 py-2.5">
             <Package className="h-4 w-4" />
             <span>{t('Product SEO', 'سيو المنتجات')}</span>
           </TabsTrigger>
+
           <TabsTrigger value="tools" className="flex items-center gap-2 py-2.5">
             <Search className="h-4 w-4" />
             <span>{t('Advanced SEO Tools', 'أدوات السيو المتقدمة')}</span>
@@ -380,6 +403,24 @@ export default function AdminSEO() {
             </div>
           </form>
         </TabsContent>
+
+        {/* Keywords Tab */}
+        <TabsContent value="keywords" className="pb-12 space-y-6">
+          <SeoKeywordsManager
+            keywordsEn={seoForm.seo_keywords_en || seoForm.seo_keywords || ''}
+            keywordsAr={seoForm.seo_keywords_ar || seoForm.seo_keywords || ''}
+            extraTerms={productTerms}
+            onChange={({ en, ar }) => setSeoForm(p => ({ ...p, seo_keywords_en: en, seo_keywords_ar: ar }))}
+          />
+          <div className="flex justify-end">
+            <Button onClick={() => seoMutation.mutate(seoForm)} disabled={seoMutation.isPending} size="lg" className="px-8">
+              {seoMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              <CheckCircle2 className="mr-2 h-5 w-5" />
+              {t('Save Keywords', 'حفظ الكلمات المفتاحية')}
+            </Button>
+          </div>
+        </TabsContent>
+
 
         {/* Product SEO Tab */}
         <TabsContent value="products" className="pb-12">

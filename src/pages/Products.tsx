@@ -7,6 +7,7 @@ import { getProducts } from '@/backend/products';
 import ProductFilters from '@/components/product/ProductFilters';
 import ProductList from '@/components/product/ProductList';
 import SEO from '@/components/SEO';
+import { smartIncludes, suggestCorrection } from '@/lib/smartSearch';
 
 const Products = () => {
   const { t, isRTL } = useLanguage();
@@ -25,17 +26,28 @@ const Products = () => {
   const categories = products ? ['all', ...new Set(products.map(product => product.category))] : ['all'];
   const sizes = products ? ['all', ...new Set(products.map(product => product.size))] : ['all'];
 
-  // Filter products based on selected filters
+  // Filter products based on selected filters (typo & keyboard-layout tolerant)
   const filteredProducts = products?.filter(product => {
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
     const matchesSize = sizeFilter === 'all' || product.size === sizeFilter;
-    const matchesSearch = searchQuery === '' || 
-                         (product.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          product.nameAr.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          product.keywords.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+    const matchesSearch = searchQuery.trim() === '' ||
+      smartIncludes(`${product.nameEn} ${product.nameAr} ${product.keywords || ''}`, searchQuery);
+
     return matchesCategory && matchesSize && matchesSearch;
   });
+
+  // Build a dictionary of known terms to power "Did you mean ...?"
+  const dictionary = (products || []).flatMap(p =>
+    [p.nameEn, p.nameAr, ...String(p.keywords || '').split(/[,،]/)]
+      .map(s => (s || '').trim())
+      .filter(Boolean)
+  );
+
+  const suggestion =
+    searchQuery.trim().length > 1 && (filteredProducts?.length ?? 0) === 0
+      ? suggestCorrection(searchQuery, dictionary)
+      : null;
+
 
   return (
     <div className={isRTL ? 'rtl' : 'ltr'}>
@@ -64,7 +76,22 @@ const Products = () => {
             setSizeFilter={setSizeFilter}
             setSearchQuery={setSearchQuery}
           />
-          
+
+          {suggestion && (
+            <div className="mb-6 rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm">
+              {t('Did you mean', 'هل تقصد')}{' '}
+              <button
+                type="button"
+                onClick={() => setSearchQuery(suggestion.suggestion)}
+                className="font-semibold text-primary underline underline-offset-4 hover:opacity-80"
+              >
+                {suggestion.suggestion}
+              </button>
+              {t('?', '؟')}
+            </div>
+          )}
+
+
           <ProductList 
             products={filteredProducts}
             isLoading={isLoading}
