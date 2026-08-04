@@ -1,16 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getServices, Service } from '../services/sheetsService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import SEO from '@/components/SEO';
+import { smartIncludes, suggestCorrection } from '@/lib/smartSearch';
 
 const Services = () => {
   const { t, language, isRTL } = useLanguage();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
 
   useEffect(() => {
     const loadServices = async () => {
