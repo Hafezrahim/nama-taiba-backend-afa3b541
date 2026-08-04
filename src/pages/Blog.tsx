@@ -109,6 +109,22 @@ const Blog = () => {
             className="max-w-md"
           />
 
+          {suggestion && (
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm max-w-md">
+              {t('Did you mean', 'هل تقصد')}{' '}
+              <button
+                type="button"
+                onClick={() => setSearchTerm(suggestion.suggestion)}
+                className="font-semibold text-primary underline underline-offset-4 hover:opacity-80"
+              >
+                {suggestion.suggestion}
+              </button>
+              {t('?', '؟')}
+            </div>
+          )}
+
+
+
           {allTags.length > 0 && (
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
