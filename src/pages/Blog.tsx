@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { getBlogs, type Blog as BlogType } from '@/backend/blogs';
 import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
+import { smartIncludes, suggestCorrection } from '@/lib/smartSearch';
+
 
 const Blog = () => {
   const { t, isRTL } = useLanguage();
@@ -37,13 +39,15 @@ const Blog = () => {
     return Array.from(tagSet).sort();
   }, [blogPosts]);
 
-  // Filter posts by selected tags and search
+  // Filter posts by selected tags and search (typo & keyboard-layout tolerant, AR/EN)
   const filteredPosts = useMemo(() => {
     if (!blogPosts) return [];
     return blogPosts.filter(post => {
-      const matchesSearch = !searchTerm ||
-        post.titleEn.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        post.titleAr.includes(searchTerm);
+      const matchesSearch = !searchTerm.trim() ||
+        smartIncludes(
+          `${post.titleEn} ${post.titleAr} ${post.keywords || ''} ${post.contentEn || ''} ${post.contentAr || ''}`,
+          searchTerm
+        );
 
       const matchesTags = selectedTags.length === 0 || selectedTags.some(tag =>
         post.keywords?.toLowerCase().includes(tag.toLowerCase())
@@ -52,6 +56,26 @@ const Blog = () => {
       return matchesSearch && matchesTags;
     });
   }, [blogPosts, selectedTags, searchTerm]);
+
+  // Dictionary of known terms for "Did you mean ...?" (both languages)
+  const dictionary = useMemo(
+    () =>
+      (blogPosts || []).flatMap(p =>
+        [p.titleEn, p.titleAr, ...String(p.keywords || '').split(/[,،]/)]
+          .map(s => (s || '').trim())
+          .filter(Boolean)
+      ),
+    [blogPosts]
+  );
+
+  const suggestion = useMemo(
+    () =>
+      searchTerm.trim().length > 1 && filteredPosts.length === 0
+        ? suggestCorrection(searchTerm, dictionary)
+        : null,
+    [searchTerm, filteredPosts.length, dictionary]
+  );
+
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev =>
@@ -84,6 +108,22 @@ const Blog = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             className="max-w-md"
           />
+
+          {suggestion && (
+            <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm max-w-md">
+              {t('Did you mean', 'هل تقصد')}{' '}
+              <button
+                type="button"
+                onClick={() => setSearchTerm(suggestion.suggestion)}
+                className="font-semibold text-primary underline underline-offset-4 hover:opacity-80"
+              >
+                {suggestion.suggestion}
+              </button>
+              {t('?', '؟')}
+            </div>
+          )}
+
+
 
           {allTags.length > 0 && (
             <div className="space-y-2">

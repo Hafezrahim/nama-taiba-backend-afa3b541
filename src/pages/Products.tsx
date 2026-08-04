@@ -31,17 +31,21 @@ const Products = () => {
     const matchesCategory = categoryFilter === 'all' || product.category === categoryFilter;
     const matchesSize = sizeFilter === 'all' || product.size === sizeFilter;
     const matchesSearch = searchQuery.trim() === '' ||
-      smartIncludes(`${product.nameEn} ${product.nameAr} ${product.keywords || ''}`, searchQuery);
+      smartIncludes(
+        `${product.nameEn} ${product.nameAr} ${product.descriptionEn || ''} ${product.descriptionAr || ''} ${product.category || ''} ${product.size || ''} ${product.keywords || ''}`,
+        searchQuery
+      );
 
     return matchesCategory && matchesSize && matchesSearch;
   });
 
-  // Build a dictionary of known terms to power "Did you mean ...?"
+  // Build a dictionary of known terms to power "Did you mean ...?" (AR + EN)
   const dictionary = (products || []).flatMap(p =>
-    [p.nameEn, p.nameAr, ...String(p.keywords || '').split(/[,،]/)]
+    [p.nameEn, p.nameAr, p.category, ...String(p.keywords || '').split(/[,،]/)]
       .map(s => (s || '').trim())
       .filter(Boolean)
   );
+
 
   const suggestion =
     searchQuery.trim().length > 1 && (filteredProducts?.length ?? 0) === 0
