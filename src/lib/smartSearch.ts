@@ -130,7 +130,19 @@ export function suggestCorrection(
   return list[0] ?? null;
 }
 
-/** Ranked list of correction suggestions. */
+/**
+ * Ranked list of correction suggestions.
+ *
+ * Scoring combines, in order of strength:
+ *  1. exact match (after normalization)          -> 1.00
+ *  2. prefix match                               -> 0.95
+ *  3. word-start match inside a multi word term  -> 0.90
+ *  4. plain containment                          -> 0.85
+ *  5. best token-level fuzzy similarity          -> 0.60 * sim + 0.25
+ *  6. whole string fuzzy similarity              -> sim
+ * Keyboard-layout variants get a small boost (they are almost always the
+ * intended word), and shorter / closer terms win ties.
+ */
 export function suggestCorrections(
   query: string,
   dictionary: string[],
@@ -147,6 +159,20 @@ export function suggestCorrections(
   const variants = queryVariants(query);
   const results: SearchSuggestion[] = [];
 
+  const scoreAgainst = (variant: string, normTerm: string): number => {
+    if (!variant || !normTerm) return 0;
+    if (variant === normTerm) return 1;
+    if (normTerm.startsWith(variant) || variant.startsWith(normTerm)) return 0.95;
+
+    const tokens = normTerm.split(' ').filter(Boolean);
+    if (tokens.some((tok) => tok.startsWith(variant))) return 0.9;
+    if (normTerm.includes(variant)) return 0.85;
+
+    const tokenSim = tokens.reduce((best, tok) => Math.max(best, similarity(variant, tok)), 0);
+    const wholeSim = similarity(variant, normTerm);
+    return Math.max(wholeSim, tokenSim * 0.6 + 0.25 * (tokenSim > 0 ? 1 : 0));
+  };
+
   for (const term of terms) {
     const normTerm = normalizeText(term);
     if (!normTerm) continue;
@@ -154,13 +180,10 @@ export function suggestCorrections(
 
     for (const variant of variants) {
       const isLayout = variant !== raw;
-      // Direct containment of a layout-converted variant is a strong signal.
-      const score = normTerm.includes(variant)
-        ? 1
-        : similarity(variant, normTerm);
+      const score = scoreAgainst(variant, normTerm);
       const reason: SearchSuggestion['reason'] = isLayout ? 'layout' : 'typo';
       // Layout conversions get a small boost — they are usually intentional mistakes.
-      const weighted = isLayout ? Math.min(1, score + 0.1) : score;
+      const weighted = Math.min(1, isLayout ? score + 0.08 : score);
       if (!best || weighted > best.score) {
         best = { suggestion: term, reason, score: weighted };
       }
@@ -170,9 +193,17 @@ export function suggestCorrections(
   }
 
   return results
-    .sort((a, b) => b.score - a.score || a.suggestion.length - b.suggestion.length)
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        // prefer layout fixes over plain typo guesses at equal score
+        Number(b.reason === 'layout') - Number(a.reason === 'layout') ||
+        a.suggestion.length - b.suggestion.length ||
+        a.suggestion.localeCompare(b.suggestion)
+    )
     .slice(0, maxResults);
 }
+
 
 /** Split a comma / newline separated keyword string into clean unique keywords. */
 export function parseKeywords(value: string): string[] {
