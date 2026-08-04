@@ -1,16 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getServices, Service } from '../services/sheetsService';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import SEO from '@/components/SEO';
+import { smartIncludes, suggestCorrection } from '@/lib/smartSearch';
 
 const Services = () => {
   const { t, language, isRTL } = useLanguage();
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+
 
   useEffect(() => {
     const loadServices = async () => {
@@ -27,6 +31,37 @@ const Services = () => {
 
     loadServices();
   }, [t]);
+
+  // Bilingual, typo & keyboard-layout tolerant filtering
+  const filteredServices = useMemo(
+    () =>
+      services.filter((s) =>
+        !searchQuery.trim() ||
+        smartIncludes(
+          `${s.titleEn} ${s.titleAr} ${s.descriptionEn || ''} ${s.descriptionAr || ''}`,
+          searchQuery
+        )
+      ),
+    [services, searchQuery]
+  );
+
+  const dictionary = useMemo(
+    () =>
+      services
+        .flatMap((s) => [s.titleEn, s.titleAr])
+        .map((v) => (v || '').trim())
+        .filter(Boolean),
+    [services]
+  );
+
+  const suggestion = useMemo(
+    () =>
+      searchQuery.trim().length > 1 && filteredServices.length === 0
+        ? suggestCorrection(searchQuery, dictionary)
+        : null,
+    [searchQuery, filteredServices.length, dictionary]
+  );
+
 
   return (
     <div className={isRTL ? 'rtl' : 'ltr'}>
@@ -45,7 +80,29 @@ const Services = () => {
             {t('Our Services', 'خدماتنا')}
           </h1>
 
+          <div className="mx-auto mb-10 max-w-md space-y-4">
+            <Input
+              placeholder={t('Search services...', 'البحث في الخدمات...')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {suggestion && (
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm">
+                {t('Did you mean', 'هل تقصد')}{' '}
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery(suggestion.suggestion)}
+                  className="font-semibold text-primary underline underline-offset-4 hover:opacity-80"
+                >
+                  {suggestion.suggestion}
+                </button>
+                {t('?', '؟')}
+              </div>
+            )}
+          </div>
+
           {loading ? (
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3, 4, 5, 6].map((_, i) => (
                 <Card key={i} className="animate-pulse">
@@ -64,7 +121,7 @@ const Services = () => {
             <div className="text-center text-red-500">{error}</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {services.map((service) => (
+              {filteredServices.map((service) => (
                 <Card key={service.id} className="border-none shadow-lg hover:shadow-xl transition-shadow">
                   <CardHeader>
                     <div className="w-16 h-16 rounded-full bg-nama-purple flex items-center justify-center mb-4">
