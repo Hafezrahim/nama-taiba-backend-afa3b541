@@ -32,6 +32,37 @@ const Services = () => {
     loadServices();
   }, [t]);
 
+  // Bilingual, typo & keyboard-layout tolerant filtering
+  const filteredServices = useMemo(
+    () =>
+      services.filter((s) =>
+        !searchQuery.trim() ||
+        smartIncludes(
+          `${s.titleEn} ${s.titleAr} ${s.descriptionEn || ''} ${s.descriptionAr || ''}`,
+          searchQuery
+        )
+      ),
+    [services, searchQuery]
+  );
+
+  const dictionary = useMemo(
+    () =>
+      services
+        .flatMap((s) => [s.titleEn, s.titleAr])
+        .map((v) => (v || '').trim())
+        .filter(Boolean),
+    [services]
+  );
+
+  const suggestion = useMemo(
+    () =>
+      searchQuery.trim().length > 1 && filteredServices.length === 0
+        ? suggestCorrection(searchQuery, dictionary)
+        : null,
+    [searchQuery, filteredServices.length, dictionary]
+  );
+
+
   return (
     <div className={isRTL ? 'rtl' : 'ltr'}>
       <SEO 
