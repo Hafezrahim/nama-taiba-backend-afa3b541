@@ -11,6 +11,8 @@ import { Input } from '@/components/ui/input';
 import { getBlogs, type Blog as BlogType } from '@/backend/blogs';
 import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
+import { smartIncludes, suggestCorrection } from '@/lib/smartSearch';
+
 
 const Blog = () => {
   const { t, isRTL } = useLanguage();
