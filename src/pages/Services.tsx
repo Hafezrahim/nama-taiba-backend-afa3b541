@@ -121,7 +121,7 @@ const Services = () => {
             <div className="text-center text-red-500">{error}</div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {services.map((service) => (
+              {filteredServices.map((service) => (
                 <Card key={service.id} className="border-none shadow-lg hover:shadow-xl transition-shadow">
                   <CardHeader>
                     <div className="w-16 h-16 rounded-full bg-nama-purple flex items-center justify-center mb-4">
