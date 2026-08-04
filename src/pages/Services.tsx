@@ -80,7 +80,29 @@ const Services = () => {
             {t('Our Services', 'خدماتنا')}
           </h1>
 
+          <div className="mx-auto mb-10 max-w-md space-y-4">
+            <Input
+              placeholder={t('Search services...', 'البحث في الخدمات...')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            {suggestion && (
+              <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 text-sm">
+                {t('Did you mean', 'هل تقصد')}{' '}
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery(suggestion.suggestion)}
+                  className="font-semibold text-primary underline underline-offset-4 hover:opacity-80"
+                >
+                  {suggestion.suggestion}
+                </button>
+                {t('?', '؟')}
+              </div>
+            )}
+          </div>
+
           {loading ? (
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3, 4, 5, 6].map((_, i) => (
                 <Card key={i} className="animate-pulse">
