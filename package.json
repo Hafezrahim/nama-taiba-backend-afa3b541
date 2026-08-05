@@ -9,7 +9,10 @@
     "dev": "vite",
     "prebuild": "npx tsx scripts/generate-sitemap.ts",
     "build": "vite build",
+    "postbuild": "npx tsx scripts/verify-pwa-assets.ts",
+    "verify:pwa": "npx tsx scripts/verify-pwa-assets.ts",
     "build:dev": "vite build --mode development",
+
     "lint": "eslint .",
     "preview": "vite preview"
   },
