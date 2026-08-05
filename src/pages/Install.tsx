@@ -24,7 +24,7 @@ const Install = () => {
         <div className="max-w-lg w-full text-center space-y-8">
           <div className="mx-auto w-28 h-28 rounded-3xl overflow-hidden shadow-xl border-2 border-primary/20">
             <img
-              src="/uploads/b209d6cf-cd6c-41b6-ac17-8fcb2b241da3.png"
+              src="/icon-512.png"
               alt="Nama Taiba"
               className="w-full h-full object-contain bg-white p-3"
             />
