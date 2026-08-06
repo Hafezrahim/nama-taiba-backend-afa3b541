@@ -254,7 +254,6 @@ function phash(file: string): number[] | null {
       cells.push(n ? sum / n : bg);
     }
   }
-  }
   const mean = cells.reduce((a, b) => a + b, 0) / cells.length;
   return cells.map((v) => (v >= mean ? 1 : 0));
 }
