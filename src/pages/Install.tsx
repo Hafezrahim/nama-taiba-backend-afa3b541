@@ -36,8 +36,8 @@ const Install = () => {
             </h1>
             <p className="text-muted-foreground max-w-sm mx-auto">
               {t(
-                'Install our app for a faster experience with offline access, push notifications, and instant loading.',
-                'ثبّت تطبيقنا للحصول على تجربة أسرع مع الوصول بدون اتصال والإشعارات والتحميل الفوري.'
+                'Install our app for a faster experience with quick access and instant loading.',
+                'ثبّت تطبيقنا للحصول على تجربة أسرع مع وصول سريع وتحميل فوري.'
               )}
             </p>
           </div>
