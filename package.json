@@ -12,9 +12,9 @@
     "postbuild": "npx tsx scripts/verify-pwa-assets.ts",
     "verify:pwa": "npx tsx scripts/verify-pwa-assets.ts",
     "build:dev": "vite build --mode development",
-
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "verify:pwa:live": "PWA_VERIFY_URL=${PWA_VERIFY_URL:-http://localhost:8080} npx tsx scripts/verify-pwa-assets.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
