@@ -216,23 +216,44 @@ const HASH = 8;
 function phash(file: string): number[] | null {
   const img = decodePng(readFileSync(file));
   if (!img) return null;
+
+  // Composite onto white, then crop to the content bounding box so padding
+  // and background plates (maskable / opaque iOS icons) compare like-for-like.
+  const lum = (x: number, y: number) => {
+    const [r, g, b, a] = img.px(x, y);
+    const al = a / 255;
+    return (0.299 * r + 0.587 * g + 0.114 * b) * al + 255 * (1 - al);
+  };
+  const bg = lum(0, 0);
+  let minX = img.w, minY = img.h, maxX = -1, maxY = -1;
+  for (let y = 0; y < img.h; y++) {
+    for (let x = 0; x < img.w; x++) {
+      if (Math.abs(lum(x, y) - bg) > 24) {
+        if (x < minX) minX = x;
+        if (x > maxX) maxX = x;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  if (maxX < 0) { minX = 0; minY = 0; maxX = img.w - 1; maxY = img.h - 1; }
+  const cw = maxX - minX + 1, ch = maxY - minY + 1;
+
   const cells: number[] = [];
   for (let gy = 0; gy < HASH; gy++) {
     for (let gx = 0; gx < HASH; gx++) {
-      const x0 = Math.floor((gx * img.w) / HASH), x1 = Math.max(x0 + 1, Math.floor(((gx + 1) * img.w) / HASH));
-      const y0 = Math.floor((gy * img.h) / HASH), y1 = Math.max(y0 + 1, Math.floor(((gy + 1) * img.h) / HASH));
+      const x0 = minX + Math.floor((gx * cw) / HASH), x1 = Math.max(x0 + 1, minX + Math.floor(((gx + 1) * cw) / HASH));
+      const y0 = minY + Math.floor((gy * ch) / HASH), y1 = Math.max(y0 + 1, minY + Math.floor(((gy + 1) * ch) / HASH));
       let sum = 0, n = 0;
-      for (let y = y0; y < y1; y++) {
-        for (let x = x0; x < x1; x++) {
-          const [r, g, b, a] = img.px(x, y);
-          // Composite onto white so transparent and opaque variants compare alike.
-          const al = a / 255;
-          sum += (0.299 * r + 0.587 * g + 0.114 * b) * al + 255 * (1 - al);
+      for (let y = y0; y < Math.min(y1, img.h); y++) {
+        for (let x = x0; x < Math.min(x1, img.w); x++) {
+          sum += lum(x, y);
           n++;
         }
       }
-      cells.push(sum / n);
+      cells.push(n ? sum / n : bg);
     }
+  }
   }
   const mean = cells.reduce((a, b) => a + b, 0) / cells.length;
   return cells.map((v) => (v >= mean ? 1 : 0));
