@@ -48,14 +48,14 @@ const PWAInstallBanner = () => {
       </button>
       <div className="flex items-center gap-3">
         <img
-          src="/uploads/b209d6cf-cd6c-41b6-ac17-8fcb2b241da3.png"
+          src="/icon-512.png"
           alt="Nama Taiba"
           className="w-12 h-12 rounded-xl object-contain bg-white p-1 border"
         />
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-sm">{t('Install Nama Taiba', 'تثبيت نما طيبة')}</p>
           <p className="text-xs text-muted-foreground mt-0.5">
-            {t('Quick access & offline support', 'وصول سريع ودعم بدون اتصال')}
+            {t('Quick access', 'وصول سريع')}
           </p>
         </div>
         <Button size="sm" onClick={handleInstall} className="gap-1.5 shrink-0">
