@@ -130,13 +130,13 @@ const Index = () => {
           </div>
         </section>
         
-        {/* Marketer Button - Mobile Only: Positioned above WhatsApp */}
-        <div className="lg:hidden fixed bottom-56 right-4 z-50">
+        {/* Marketer Button - Mobile Only: Positioned above WhatsApp stack with clearance */}
+        <div className="lg:hidden fixed bottom-[16rem] right-4 z-50">
           <MarketerApplicationForm />
         </div>
 
-        {/* Desktop: Marketer button + Social icons in one vertical stack (no overlap) */}
-        <div className="hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 z-50 flex-col items-start gap-3">
+        {/* Desktop: Marketer button + Social icons stacked above the chatbot (no overlap) */}
+        <div className="hidden lg:flex fixed left-4 bottom-[16.5rem] z-50 flex-col items-start gap-3">
           <MarketerApplicationForm />
 
           <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-all">
