@@ -161,7 +161,7 @@ const ChatbotWidget = () => {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+12.5rem)] md:bottom-[calc(env(safe-area-inset-bottom,0px)+11.5rem)] z-50 w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:scale-110 animate-bounce"
+          className="fixed bottom-[calc(env(safe-area-inset-bottom,0px)+14.75rem)] md:bottom-[calc(env(safe-area-inset-bottom,0px)+11.5rem)] z-50 w-12 h-12 md:w-14 md:h-14 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center hover:scale-110 animate-bounce"
           style={{ [isRTL ? 'left' : 'right']: '1rem' }}
           aria-label="Open chat"
         >

@@ -131,7 +131,7 @@ const Index = () => {
         </section>
         
         {/* Marketer Button - Mobile Only: Positioned above chatbot/WhatsApp stack with clearance */}
-        <div className="lg:hidden fixed bottom-[17.5rem] right-4 z-50">
+        <div className="lg:hidden fixed bottom-[19rem] right-4 z-50">
           <MarketerApplicationForm />
         </div>
 
