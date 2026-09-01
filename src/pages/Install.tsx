@@ -5,6 +5,7 @@ import { Download, Smartphone, Chrome, Globe, Monitor, Apple } from 'lucide-reac
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import SEO from '@/components/SEO';
+import InstallContactForm from '@/components/install/InstallContactForm';
 import { cn } from '@/lib/utils';
 
 const Install = () => {
@@ -125,6 +126,8 @@ const Install = () => {
               </div>
             </div>
           )}
+
+          <InstallContactForm />
         </div>
       </main>
       <Footer />
