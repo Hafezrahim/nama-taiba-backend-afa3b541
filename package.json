@@ -14,7 +14,8 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "verify:pwa:live": "PWA_VERIFY_URL=${PWA_VERIFY_URL:-http://localhost:8080} npx tsx scripts/verify-pwa-assets.ts"
+    "verify:pwa:live": "PWA_VERIFY_URL=${PWA_VERIFY_URL:-http://localhost:8080} npx tsx scripts/verify-pwa-assets.ts",
+    "build:desktop": "vite build --base ./ --outDir dist-electron"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -96,5 +97,6 @@
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.0.1",
     "vite": "^5.4.1"
-  }
+  },
+  "main": "electron/main.cjs"
 }
