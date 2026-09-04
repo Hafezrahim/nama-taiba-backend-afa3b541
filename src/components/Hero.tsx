@@ -14,8 +14,8 @@ const Hero = () => {
       }}>
       </div>
       
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-32 relative z-10">
-        <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+      <div className="w-full max-w-none px-5 py-12 sm:container sm:mx-auto sm:px-6 lg:px-8 sm:py-20 lg:py-32 relative z-10">
+        <div className="flex flex-col lg:flex-row items-center gap-8 sm:gap-10 lg:gap-16">
           {/* Hero Content */}
           <div className={`w-full lg:w-1/2 text-white ${isRTL ? 'text-right lg:order-2' : 'text-left lg:order-1'}`}>
             <h1 className={`font-bold mb-5 sm:mb-6 my-0 ${
@@ -41,9 +41,9 @@ const Hero = () => {
                 'يوفر مصنع نما طيبة مواد بناء عالية الجودة وحلولًا مبتكرة لمشاريع البناء من جميع الأحجام.'
               )}
             </p>
-            <div className={`flex flex-wrap gap-4 ${isRTL ? 'justify-start' : 'justify-start'}`}>
-              <Link to="/products">
-                <Button className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-8 py-4 text-lg rounded-full shadow-lg">
+            <div className="flex flex-wrap gap-4 justify-start">
+              <Link to="/products" className="w-full sm:w-auto">
+                <Button className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-8 py-4 text-lg rounded-full shadow-lg">
                   {t('Shop Now', 'تسوق الآن')}
                 </Button>
               </Link>
@@ -52,12 +52,12 @@ const Hero = () => {
 
           
           {/* Hero Image */}
-          <div className={`lg:w-1/2 mt-10 lg:mt-0 ${isRTL ? 'lg:order-1' : 'lg:order-2'}`}>
-            <div className="bg-white p-2 rounded-lg shadow-xl transform rotate-2">
+          <div className={`w-screen -mx-5 sm:w-auto sm:mx-0 lg:w-1/2 mt-6 sm:mt-10 lg:mt-0 ${isRTL ? 'lg:order-1' : 'lg:order-2'}`}>
+            <div className="bg-white p-0 sm:p-2 rounded-none sm:rounded-lg shadow-xl transform-none sm:rotate-2">
               <img 
                 src="/uploads/factory-silos.png" 
                 alt={t('Nama Taiba Factory Silos', 'صوامع مصنع نما طيبة')} 
-                className="w-full h-auto rounded max-h-[500px] object-cover" 
+                className="w-full h-auto rounded-none sm:rounded max-h-[280px] sm:max-h-[500px] object-cover" 
               />
             </div>
           </div>
