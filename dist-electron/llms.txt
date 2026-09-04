@@ -1,0 +1,19 @@
+# Nama Taiba Factory
+
+> Saudi Arabian manufacturer of premium building materials including GRC, GRP, and modern construction solutions.
+
+Nama Taiba Factory designs and produces building materials for contractors, architects, and developers across Saudi Arabia. The site showcases the product catalog, completed projects, services, certifications, and offers, and provides direct ordering and quotation flows for clients.
+
+## Pages
+
+- [Home](/): Company overview, featured products, projects, and offers.
+- [Products](/products): Catalog of building materials with filtering and details.
+- [Projects](/projects): Completed construction and architectural projects.
+- [Services](/services): Construction and manufacturing services offered.
+- [Offers](/offers): Current promotions and special offers.
+- [Blog](/blog): Articles on building materials, construction, and industry insights.
+- [About](/about): Company mission, team, certifications, and partners.
+- [Quality](/quality): Quality certifications and standards.
+- [Partners](/partners): Success partners and collaborators.
+- [Contact](/contact): Contact information and inquiry form.
+- [Install](/install): Instructions to install the Nama Taiba PWA.
