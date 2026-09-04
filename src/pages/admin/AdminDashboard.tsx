@@ -86,6 +86,29 @@ const AdminDashboard = () => {
     }
   });
 
+  // Fetch inbound leads: contact inquiries + marketer applications
+  const { data: leadCounts, isLoading: isLoadingLeads } = useQuery({
+    queryKey: ['lead-counts'],
+    queryFn: async () => {
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const [contactsRes, contactsNewRes, marketersRes, marketersNewRes] = await Promise.all([
+        supabase.from('contact_submissions').select('*', { count: 'exact', head: true }),
+        supabase.from('contact_submissions').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo),
+        supabase.from('marketer_applications').select('*', { count: 'exact', head: true }),
+        supabase.from('marketer_applications').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo),
+      ]);
+
+      return {
+        contacts: contactsRes.count || 0,
+        contactsNew: contactsNewRes.count || 0,
+        marketers: marketersRes.count || 0,
+        marketersNew: marketersNewRes.count || 0,
+      };
+    }
+  });
+
+
+
   // Fetch products, projects, offers counts
   const { data: contentCounts, isLoading: isLoadingContent } = useQuery({
     queryKey: ['content-counts'],
