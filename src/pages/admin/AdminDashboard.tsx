@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Package, ShoppingBag, Users, MessageSquare, FileText, Settings, 
   TrendingUp, DollarSign, ShoppingCart, UserCheck, Truck, MapPin,
-  ArrowUpRight, ArrowDownRight, Sparkles, Clock
+  ArrowUpRight, ArrowDownRight, Sparkles, Clock, Briefcase
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import OrderTrendsChart from '@/components/admin/OrderTrendsChart';
@@ -234,8 +234,27 @@ const AdminDashboard = () => {
       icon: TrendingUp,
       gradient: 'from-amber-500 to-orange-600',
       bgGradient: 'from-amber-500/10 to-orange-600/5'
+    },
+    {
+      title: t('Contact Inquiries', 'رسائل التواصل'),
+      value: isLoadingLeads ? null : (leadCounts?.contacts || 0).toLocaleString(),
+      change: null,
+      subtitle: isLoadingLeads ? null : `${leadCounts?.contactsNew || 0} ${t('new', 'جديدة')}`,
+      icon: MessageSquare,
+      gradient: 'from-sky-500 to-indigo-600',
+      bgGradient: 'from-sky-500/10 to-indigo-600/5'
+    },
+    {
+      title: t('Marketer Applications', 'طلبات المسوقين'),
+      value: isLoadingLeads ? null : (leadCounts?.marketers || 0).toLocaleString(),
+      change: null,
+      subtitle: isLoadingLeads ? null : `${leadCounts?.marketersNew || 0} ${t('new', 'جديدة')}`,
+      icon: Briefcase,
+      gradient: 'from-rose-500 to-pink-600',
+      bgGradient: 'from-rose-500/10 to-pink-600/5'
     }
   ];
+
 
   const totalDistricts = shippingSummary?.reduce((sum, city) => sum + city.districtsCount, 0) || 0;
   const totalCities = shippingSummary?.length || 0;
