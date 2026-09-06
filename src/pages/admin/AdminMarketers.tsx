@@ -7,8 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { Check, Trash2, Download, Search, Filter, X, CheckCheck } from 'lucide-react';
+import { Check, Trash2, Download, Search, Filter, X, CheckCheck, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import SubmissionDetailDialog from '@/components/admin/SubmissionDetailDialog';
 
 interface MarketerApplication {
   id: string;
@@ -37,6 +38,7 @@ export default function AdminMarketers() {
   
   // Selection states
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [detailApp, setDetailApp] = useState<MarketerApplication | null>(null);
 
   useEffect(() => {
     fetchApplications();
@@ -410,6 +412,9 @@ export default function AdminMarketers() {
                   <TableCell>{new Date(app.created_at).toLocaleDateString()}</TableCell>
                   <TableCell className={language === 'ar' ? 'text-left' : 'text-right'}>
                     <div className="flex gap-2 justify-end">
+                      <Button variant="secondary" size="sm" onClick={() => setDetailApp(app)} title={t('View Details', 'عرض التفاصيل')}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
                       {!app.is_processed && (
                         <Button
                           variant="outline"
@@ -434,6 +439,30 @@ export default function AdminMarketers() {
           </TableBody>
         </Table>
       </div>
+
+      <SubmissionDetailDialog
+        open={!!detailApp}
+        onOpenChange={(o) => !o && setDetailApp(null)}
+        title={t('Marketer Application', 'طلب مسوق')}
+        description={detailApp ? new Date(detailApp.created_at).toLocaleString() : undefined}
+        phone={detailApp?.phone}
+        fields={detailApp ? [
+          { label: t('Name', 'الاسم'), value: detailApp.name },
+          { label: t('Phone', 'الهاتف'), value: detailApp.phone, dir: 'ltr' as const },
+          { label: t('City', 'المدينة'), value: detailApp.city },
+          { label: t('Experience', 'الخبرة'), value: detailApp.total_experience },
+          { label: t('Status', 'الحالة'), value: detailApp.is_processed ? t('Processed', 'معالج') : t('Pending', 'قيد الانتظار') },
+          { label: t('CV', 'السيرة الذاتية'), value: detailApp.cv_file_name || t('Not provided', 'غير مرفق') },
+          { label: t('Message', 'الرسالة'), value: detailApp.message, multiline: true },
+        ] : []}
+      >
+        {detailApp?.cv_file_data && (
+          <Button variant="outline" className="gap-2 w-fit" onClick={() => handleDownloadCV(detailApp)}>
+            <Download className="h-4 w-4" />
+            {t('Download CV', 'تحميل السيرة الذاتية')}
+          </Button>
+        )}
+      </SubmissionDetailDialog>
     </div>
   );
 }
