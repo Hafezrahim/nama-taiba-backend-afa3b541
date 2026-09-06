@@ -294,8 +294,18 @@ const AdminDashboard = () => {
       icon: Briefcase,
       gradient: 'from-rose-500 to-pink-600',
       bgGradient: 'from-rose-500/10 to-pink-600/5'
+    },
+    {
+      title: t('Blog Traffic', 'مشاهدات المدونة'),
+      value: isLoadingBlogTraffic ? null : (blogTraffic?.totalViews || 0).toLocaleString(),
+      change: null,
+      subtitle: isLoadingBlogTraffic ? null : `${blogTraffic?.publishedPosts || 0} ${t('published posts', 'مقالة منشورة')}`,
+      icon: FileText,
+      gradient: 'from-teal-500 to-emerald-600',
+      bgGradient: 'from-teal-500/10 to-emerald-600/5'
     }
   ];
+
 
 
   const totalDistricts = shippingSummary?.reduce((sum, city) => sum + city.districtsCount, 0) || 0;
