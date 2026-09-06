@@ -107,6 +107,25 @@ const AdminDashboard = () => {
     }
   });
 
+  // Fetch blog traffic (total views across published posts)
+  const { data: blogTraffic, isLoading: isLoadingBlogTraffic } = useQuery({
+    queryKey: ['blog-traffic'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blogs')
+        .select('views_count, is_published');
+
+      if (error) throw error;
+
+      const published = (data || []).filter((b: any) => b.is_published);
+      const totalViews = published.reduce((sum: number, b: any) => sum + (b.views_count || 0), 0);
+
+      return { totalViews, publishedPosts: published.length };
+    }
+  });
+
+
+
 
 
   // Fetch products, projects, offers counts
