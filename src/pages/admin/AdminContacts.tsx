@@ -4,9 +4,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Eye, Trash2 } from 'lucide-react';
+import { Eye, Trash2, FileText } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import AdminTablePagination from '@/components/admin/AdminTablePagination';
+import SubmissionDetailDialog from '@/components/admin/SubmissionDetailDialog';
 
 interface ContactSubmission {
   id: string;
@@ -25,6 +26,7 @@ export default function AdminContacts() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const rowsPerPage = 15;
+  const [detail, setDetail] = useState<ContactSubmission | null>(null);
 
   const totalPages = Math.ceil(contacts.length / rowsPerPage);
   const paginatedContacts = useMemo(() => contacts.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage), [contacts, currentPage]);
@@ -126,6 +128,14 @@ export default function AdminContacts() {
                   <TableCell>{new Date(contact.created_at).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex gap-2 justify-end">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => { setDetail(contact); if (!contact.is_read) handleMarkAsRead(contact.id); }}
+                        title={t('View Details', 'عرض التفاصيل')}
+                      >
+                        <FileText className="h-4 w-4" />
+                      </Button>
                       {!contact.is_read && (
                         <Button
                           variant="outline"
@@ -150,6 +160,23 @@ export default function AdminContacts() {
           </TableBody>
         </Table>
       </div>
+
+      <SubmissionDetailDialog
+        open={!!detail}
+        onOpenChange={(o) => !o && setDetail(null)}
+        title={t('Contact Inquiry', 'رسالة تواصل')}
+        description={detail ? new Date(detail.created_at).toLocaleString() : undefined}
+        email={detail?.email}
+        phone={detail?.phone}
+        defaultSubject={detail?.subject ? `Re: ${detail.subject}` : t('Re: Your inquiry', 'رد: استفسارك')}
+        fields={detail ? [
+          { label: t('Name', 'الاسم'), value: detail.name },
+          { label: t('Email', 'البريد الإلكتروني'), value: detail.email, dir: 'ltr' as const },
+          { label: t('Phone', 'الهاتف'), value: detail.phone, dir: 'ltr' as const },
+          { label: t('Subject', 'الموضوع'), value: detail.subject },
+          { label: t('Message', 'الرسالة'), value: detail.message, multiline: true },
+        ] : []}
+      />
 
       <AdminTablePagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalItems={contacts.length} itemsPerPage={rowsPerPage} />
     </div>
