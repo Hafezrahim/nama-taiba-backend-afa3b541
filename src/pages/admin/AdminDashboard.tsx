@@ -107,6 +107,25 @@ const AdminDashboard = () => {
     }
   });
 
+  // Fetch blog traffic (total views across published posts)
+  const { data: blogTraffic, isLoading: isLoadingBlogTraffic } = useQuery({
+    queryKey: ['blog-traffic'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('blogs')
+        .select('views_count, is_published');
+
+      if (error) throw error;
+
+      const published = (data || []).filter((b: any) => b.is_published);
+      const totalViews = published.reduce((sum: number, b: any) => sum + (b.views_count || 0), 0);
+
+      return { totalViews, publishedPosts: published.length };
+    }
+  });
+
+
+
 
 
   // Fetch products, projects, offers counts
@@ -275,8 +294,18 @@ const AdminDashboard = () => {
       icon: Briefcase,
       gradient: 'from-rose-500 to-pink-600',
       bgGradient: 'from-rose-500/10 to-pink-600/5'
+    },
+    {
+      title: t('Blog Traffic', 'مشاهدات المدونة'),
+      value: isLoadingBlogTraffic ? null : (blogTraffic?.totalViews || 0).toLocaleString(),
+      change: null,
+      subtitle: isLoadingBlogTraffic ? null : `${blogTraffic?.publishedPosts || 0} ${t('published posts', 'مقالة منشورة')}`,
+      icon: FileText,
+      gradient: 'from-teal-500 to-emerald-600',
+      bgGradient: 'from-teal-500/10 to-emerald-600/5'
     }
   ];
+
 
 
   const totalDistricts = shippingSummary?.reduce((sum, city) => sum + city.districtsCount, 0) || 0;
