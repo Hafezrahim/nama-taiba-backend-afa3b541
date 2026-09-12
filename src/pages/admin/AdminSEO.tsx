@@ -9,11 +9,12 @@ import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Globe, Search, Code, CheckCircle2, Package, Tags } from 'lucide-react';
+import { Loader2, Globe, Search, Code, CheckCircle2, Package, Tags, Bot } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import SeoIndexingTools from '@/components/admin/seo/SeoIndexingTools';
 import ProductSeoTable from '@/components/admin/seo/ProductSeoTable';
 import SeoKeywordsManager from '@/components/admin/seo/SeoKeywordsManager';
+import SeoAeoGeoTools from '@/components/admin/seo/SeoAeoGeoTools';
 
 export default function AdminSEO() {
   const { t } = useLanguage();
@@ -101,7 +102,7 @@ export default function AdminSEO() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4 lg:w-[1000px] h-auto p-1 bg-muted/50">
+        <TabsList className="grid w-full grid-cols-2 lg:grid-cols-5 lg:w-[1200px] h-auto p-1 bg-muted/50">
           <TabsTrigger value="global" className="flex items-center gap-2 py-2.5">
             <Globe className="h-4 w-4" />
             <span>{t('Global Meta & Settings', 'العلامات الوصفية والإعدادات')}</span>
@@ -113,6 +114,11 @@ export default function AdminSEO() {
           <TabsTrigger value="products" className="flex items-center gap-2 py-2.5">
             <Package className="h-4 w-4" />
             <span>{t('Product SEO', 'سيو المنتجات')}</span>
+          </TabsTrigger>
+
+          <TabsTrigger value="aeogeo" className="flex items-center gap-2 py-2.5">
+            <Bot className="h-4 w-4" />
+            <span>{t('AEO & GEO', 'AEO و GEO')}</span>
           </TabsTrigger>
 
           <TabsTrigger value="tools" className="flex items-center gap-2 py-2.5">
