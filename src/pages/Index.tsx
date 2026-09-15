@@ -17,7 +17,6 @@ import { getContactInfo, type ContactInfo } from '@/backend/contact';
 import { getCertifications } from '@/backend/certifications';
 import { getPartners } from '@/backend/partners';
 import { type Certification, type Partner } from '@/backend/index';
-import { MarketerApplicationForm } from '@/components/MarketerApplicationForm';
 import LeafletMap from '@/components/ui/leaflet-map';
 import SEO from '@/components/SEO';
 import ChatbotWidget from '@/components/ChatbotWidget';
