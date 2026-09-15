@@ -16,7 +16,7 @@ const saudiCities = [
   'الأحساء', 'القطيف', 'أبها', 'عرعر', 'سكاكا', 'الباحة', 'الجبيل'
 ];
 
-export const MarketerApplicationForm = () => {
+export const MarketerApplicationForm = ({ variant = 'floating' }: { variant?: 'floating' | 'header' } = {}) => {
   const { t, isRTL } = useLanguage();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
@@ -110,13 +110,23 @@ export const MarketerApplicationForm = () => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          className="bg-nama-gold hover:bg-nama-orange text-white px-6 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 font-semibold"
-          size="lg"
-        >
-          <Briefcase className="h-5 w-5" />
-          {t('Become a Marketer', 'مندوب المبيعات')}
-        </Button>
+        {variant === 'header' ? (
+          <button
+            type="button"
+            className={`flex items-center gap-2 hover:text-white transition-colors ${isRTL ? 'flex-row-reverse' : ''}`}
+          >
+            <Briefcase className="h-4 w-4" />
+            <span>{t('Become a Marketer', 'مندوب المبيعات')}</span>
+          </button>
+        ) : (
+          <Button 
+            className="bg-nama-gold hover:bg-nama-orange text-white px-6 py-3 rounded-full shadow-xl hover:shadow-2xl transition-all transform hover:scale-105 font-semibold"
+            size="lg"
+          >
+            <Briefcase className="h-5 w-5" />
+            {t('Become a Marketer', 'مندوب المبيعات')}
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>

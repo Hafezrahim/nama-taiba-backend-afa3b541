@@ -427,6 +427,16 @@ export default function AdminSEO() {
           </div>
         </TabsContent>
 
+        {/* AEO & GEO Tab */}
+        <TabsContent value="aeogeo" className="pb-12">
+          <SeoAeoGeoTools
+            values={seoForm}
+            onChange={(patch) => setSeoForm(p => ({ ...p, ...patch }))}
+            onSave={() => seoMutation.mutate(seoForm)}
+            saving={seoMutation.isPending}
+          />
+        </TabsContent>
+
 
         {/* Product SEO Tab */}
         <TabsContent value="products" className="pb-12">

@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import ukFlag from '@/assets/uk-flag.png';
 import saFlag from '@/assets/sa-flag.png';
+import { MarketerApplicationForm } from '@/components/MarketerApplicationForm';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -122,6 +123,8 @@ const TopHeader = () => {
               </div>
               <span>{t('Wishlist', 'المفضلة')}</span>
             </Link>
+
+            <MarketerApplicationForm variant="header" />
 
             {/* Sign in / user menu moved to main header (UserActions) */}
 

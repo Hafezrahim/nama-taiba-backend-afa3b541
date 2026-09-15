@@ -100,6 +100,45 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
   const canonicalUrl = settings.meta_canonical_url || 'https://www.nama-taiba.com';
   const ogImage = settings.seo_og_image || `${canonicalUrl}/uploads/logo.png`;
 
+  const entitySummary = (language === 'ar' ? settings.geo_entity_summary_ar : settings.geo_entity_summary_en) || '';
+
+  let faqJsonLd = '';
+  try {
+    const faqs = JSON.parse(settings.aeo_faqs || '[]');
+    const entries = (Array.isArray(faqs) ? faqs : [])
+      .map((f: any) => ({
+        question: language === 'ar' ? f.q_ar : f.q_en,
+        answer: language === 'ar' ? f.a_ar : f.a_en,
+      }))
+      .filter((f: any) => f.question && f.answer);
+    if (entries.length) {
+      faqJsonLd = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: entries.map((f: any) => ({
+          '@type': 'Question',
+          name: f.question,
+          acceptedAnswer: { '@type': 'Answer', text: f.answer },
+        })),
+      });
+    }
+  } catch {
+    faqJsonLd = '';
+  }
+
+  const speakableJsonLd = settings.aeo_speakable === 'true'
+    ? JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'WebPage',
+        url: canonicalUrl,
+        name: title || 'Nama Taiba',
+        speakable: {
+          '@type': 'SpeakableSpecification',
+          cssSelector: ['h1', '.speakable', '[data-speakable]'],
+        },
+      })
+    : '';
+
   return (
     <Helmet>
       <html lang={language === 'ar' ? 'ar' : 'en'} dir={language === 'ar' ? 'rtl' : 'ltr'} />
@@ -131,6 +170,23 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       {settings.verify_bing && <meta name="msvalidate.01" content={settings.verify_bing} />}
       {settings.verify_yandex && <meta name="yandex-verification" content={settings.verify_yandex} />}
       {settings.verify_pinterest && <meta name="p:domain_verify" content={settings.verify_pinterest} />}
+
+      {/* GEO: local / geographic targeting */}
+      {settings.geo_region && <meta name="geo.region" content={settings.geo_region} />}
+      {settings.geo_placename && <meta name="geo.placename" content={settings.geo_placename} />}
+      {settings.geo_lat && settings.geo_lng && (
+        <meta name="geo.position" content={`${settings.geo_lat};${settings.geo_lng}`} />
+      )}
+      {settings.geo_lat && settings.geo_lng && (
+        <meta name="ICBM" content={`${settings.geo_lat}, ${settings.geo_lng}`} />
+      )}
+
+      {/* AEO: entity summary for answer engines */}
+      {entitySummary && <meta name="description-extended" content={entitySummary} />}
+
+      {/* AEO: FAQ structured data */}
+      {faqJsonLd && <script type="application/ld+json">{faqJsonLd}</script>}
+      {speakableJsonLd && <script type="application/ld+json">{speakableJsonLd}</script>}
     </Helmet>
   );
 }

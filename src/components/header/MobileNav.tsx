@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
+import { MarketerApplicationForm } from '@/components/MarketerApplicationForm';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -93,6 +94,12 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
         >
           {t('Wishlist', 'المفضلة')} ({wishlistItems.length})
         </Link>
+
+        <div className="py-2 text-nama-purple font-medium">
+          <MarketerApplicationForm variant="header" />
+        </div>
+
+
 
         {/* Auth links — visible only when not logged in and not on auth pages */}
         {!user && !isAuthPage && (
