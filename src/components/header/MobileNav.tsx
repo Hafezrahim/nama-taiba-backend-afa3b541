@@ -94,6 +94,12 @@ const MobileNav = ({ isOpen, onClose }: MobileNavProps) => {
           {t('Wishlist', 'المفضلة')} ({wishlistItems.length})
         </Link>
 
+        <div className="py-2 text-nama-purple font-medium">
+          <MarketerApplicationForm variant="header" />
+        </div>
+
+
+
         {/* Auth links — visible only when not logged in and not on auth pages */}
         {!user && !isAuthPage && (
           <>
