@@ -441,6 +441,8 @@ export default function AdminMarketers() {
       </div>
 
       <SubmissionDetailDialog
+        submissionType="marketer_application"
+        submissionId={detailApp?.id}
         open={!!detailApp}
         onOpenChange={(o) => !o && setDetailApp(null)}
         title={t('Marketer Application', 'طلب مسوق')}

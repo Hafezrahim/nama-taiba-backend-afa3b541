@@ -870,6 +870,33 @@ export type Database = {
         }
         Relationships: []
       }
+      page_views: {
+        Row: {
+          created_at: string
+          id: string
+          language: string | null
+          page_title: string | null
+          path: string
+          referrer: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          language?: string | null
+          page_title?: string | null
+          path: string
+          referrer?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          language?: string | null
+          page_title?: string | null
+          path?: string
+          referrer?: string | null
+        }
+        Relationships: []
+      }
       partners: {
         Row: {
           created_at: string | null
@@ -1470,6 +1497,48 @@ export type Database = {
           title_ar?: string
           title_en?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      submission_replies: {
+        Row: {
+          channel: string
+          created_at: string
+          error_message: string | null
+          id: string
+          message: string
+          recipient: string
+          sent_by: string | null
+          status: string
+          subject: string | null
+          submission_id: string
+          submission_type: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message: string
+          recipient: string
+          sent_by?: string | null
+          status?: string
+          subject?: string | null
+          submission_id: string
+          submission_type: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          message?: string
+          recipient?: string
+          sent_by?: string | null
+          status?: string
+          subject?: string | null
+          submission_id?: string
+          submission_type?: string
         }
         Relationships: []
       }
