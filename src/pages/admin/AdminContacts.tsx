@@ -70,16 +70,37 @@ export default function AdminContacts() {
     if (!confirm(t('Are you sure?', 'هل أنت متأكد؟'))) return;
 
     try {
-      const { error } = await supabase
+      try {
+        await supabase
+          .from('submission_replies')
+          .delete()
+          .eq('submission_id', id);
+      } catch {
+        // Continue even if replies table has no matches
+      }
+
+      const { data, error, count } = await supabase
         .from('contact_submissions')
-        .delete()
-        .eq('id', id);
+        .delete({ count: 'exact' })
+        .eq('id', id)
+        .select();
 
       if (error) throw error;
+
+      if (data && data.length === 0 && count === 0) {
+        throw new Error(
+          t(
+            'Deletion was blocked by database permissions (RLS). Please ensure admin delete policy is applied.',
+            'تم منع الحذف بواسطة صلاحيات قاعدة البيانات (RLS). يرجى التأكد من تطبيق سياسة الحذف للمشرف.'
+          )
+        );
+      }
+
       toast.success(t('Deleted successfully', 'تم الحذف بنجاح'));
+      setContacts(prev => prev.filter(c => c.id !== id));
       fetchContacts();
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || t('Failed to delete contact submission', 'فشل حذف الرسالة'));
     }
   };
 

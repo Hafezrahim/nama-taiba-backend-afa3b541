@@ -6,6 +6,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CertificationsSection from '@/components/about/CertificationsSection';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ShieldCheck, Award, FileCheck2, BadgeCheck, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import SEO from '@/components/SEO';
 
 interface QualitySection {
@@ -63,28 +65,77 @@ const Quality: React.FC = () => {
           </p>
 
           {sectionsLoading ? (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-16">
-              <Skeleton className="h-40 w-full" />
-              <Skeleton className="h-40 w-full" />
-              <Skeleton className="h-40 w-full" />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-16">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="h-64 rounded-2xl border bg-card/60 p-6 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <Skeleton className="h-12 w-12 rounded-xl" />
+                    <Skeleton className="h-6 w-12 rounded-full" />
+                  </div>
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-5/6" />
+                </div>
+              ))}
             </div>
           ) : sections.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 mb-16 items-stretch">
-
-              {sections.map((s) => {
+              {sections.map((s, idx) => {
                 const title = language === 'ar' ? s.title_ar : s.title_en;
                 const content = language === 'ar' ? s.content_ar : s.content_en;
-                return (
-                  <article key={s.id} className="h-full flex flex-col bg-card border rounded-xl p-6 shadow-sm">
-                    <h2 className="text-xl md:text-2xl font-bold mb-4 text-foreground">{title}</h2>
-                    {content && (
-                      <div
-                        className="prose prose-sm md:prose-base max-w-none dark:prose-invert prose-img:rounded-lg prose-img:mx-auto prose-headings:text-foreground prose-p:text-foreground/90 leading-relaxed break-words"
+                const icons = [ShieldCheck, Award, FileCheck2, BadgeCheck, Sparkles, CheckCircle2];
+                const IconComponent = icons[idx % icons.length];
 
-                        dir={isRTL ? 'rtl' : 'ltr'}
-                        dangerouslySetInnerHTML={{ __html: content }}
-                      />
-                    )}
+                return (
+                  <article 
+                    key={s.id} 
+                    className="group relative h-full flex flex-col justify-between overflow-hidden rounded-2xl border border-border/70 bg-gradient-to-b from-card via-card to-muted/20 p-7 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1.5 hover:border-nama-purple/40 dark:hover:border-nama-gold/40"
+                  >
+                    {/* Top gradient accent line */}
+                    <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-nama-purple via-nama-red to-nama-gold opacity-75 group-hover:opacity-100 transition-opacity" />
+
+                    {/* Subtle corner radial glow */}
+                    <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-nama-purple/5 dark:bg-nama-gold/5 blur-2xl group-hover:bg-nama-purple/10 dark:group-hover:bg-nama-gold/10 transition-colors pointer-events-none" />
+
+                    <div>
+                      {/* Card Header: Icon & Step/Order Pill */}
+                      <div className="flex items-center justify-between gap-4 mb-5">
+                        <div className="h-12 w-12 rounded-xl bg-nama-purple/10 dark:bg-nama-gold/10 text-nama-purple dark:text-nama-gold flex items-center justify-center shadow-inner group-hover:scale-110 group-hover:bg-nama-purple group-hover:text-white dark:group-hover:bg-nama-gold dark:group-hover:text-black transition-all duration-300">
+                          <IconComponent className="h-6 w-6" />
+                        </div>
+                        <Badge 
+                          variant="secondary" 
+                          className="font-mono text-xs px-2.5 py-0.5 bg-muted/80 text-muted-foreground group-hover:bg-nama-purple/10 group-hover:text-nama-purple dark:group-hover:bg-nama-gold/10 dark:group-hover:text-nama-gold transition-colors"
+                        >
+                          {String(idx + 1).padStart(2, '0')}
+                        </Badge>
+                      </div>
+
+                      {/* Title */}
+                      <h2 className="text-xl md:text-2xl font-bold mb-4 text-foreground tracking-tight group-hover:text-nama-purple dark:group-hover:text-nama-gold transition-colors">
+                        {title}
+                      </h2>
+
+                      {/* Content */}
+                      {content && (
+                        <div
+                          className="prose prose-sm md:prose-base max-w-none dark:prose-invert prose-headings:text-foreground prose-headings:font-semibold prose-p:text-muted-foreground prose-p:leading-relaxed prose-strong:text-foreground prose-ul:my-2 prose-li:my-1 prose-img:rounded-lg prose-img:mx-auto leading-relaxed break-words"
+                          dir={isRTL ? 'rtl' : 'ltr'}
+                          dangerouslySetInnerHTML={{ __html: content }}
+                        />
+                      )}
+                    </div>
+
+                    {/* Card Footer: Certified Standard Pill */}
+                    <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
+                      <span className="flex items-center gap-1.5 text-nama-purple dark:text-nama-gold font-medium">
+                        <BadgeCheck className="h-4 w-4" />
+                        {t('Certified Standard', 'معيار معتمد')}
+                      </span>
+                      <span className="text-[11px] uppercase tracking-wider text-muted-foreground/70">
+                        Nama Taiba
+                      </span>
+                    </div>
                   </article>
                 );
               })}

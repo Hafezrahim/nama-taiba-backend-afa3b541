@@ -4,13 +4,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { type Certification } from '@/backend/certifications';
+import { Eye, Award } from 'lucide-react';
 
 interface CertificationCardProps {
   certification: Certification;
 }
 
 const CertificationCard = ({ certification }: CertificationCardProps) => {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [showImagePopup, setShowImagePopup] = useState(false);
   const [fullLoaded, setFullLoaded] = useState(false);
 
@@ -27,27 +28,44 @@ const CertificationCard = ({ certification }: CertificationCardProps) => {
   return (
     <>
       <Card
-        className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+        className="group overflow-hidden rounded-xl border border-border/70 bg-card hover:border-nama-purple/40 dark:hover:border-nama-gold/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col h-full"
         onMouseEnter={prefetch}
         onTouchStart={prefetch}
         onClick={() => certification.image && setShowImagePopup(true)}
       >
-        <CardContent className="p-0">
+        <CardContent className="p-0 flex flex-col h-full">
           {certification.image ? (
-            <div className="h-48 w-full bg-background flex items-center justify-center p-4">
+            <div className="relative h-48 w-full bg-muted/30 flex items-center justify-center p-4 overflow-hidden">
               <img
                 src={certification.image}
                 alt={name}
                 loading="lazy"
                 decoding="async"
-                className="max-w-full max-h-full object-contain hover:opacity-90 transition-opacity"
+                className="max-w-full max-h-full object-contain transition-transform duration-500 group-hover:scale-105"
               />
+              <div className="absolute inset-0 bg-nama-purple/20 dark:bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[1px]">
+                <span className="bg-background/95 text-foreground text-xs font-medium px-3 py-1.5 rounded-full shadow-md flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
+                  <Eye className="h-3.5 w-3.5 text-nama-purple dark:text-nama-gold" />
+                  {t('View Certificate', 'عرض الشهادة')}
+                </span>
+              </div>
             </div>
           ) : (
-            <div className="h-48 w-full bg-muted flex items-center justify-center p-4 text-center">
-              <span className="text-lg font-semibold text-muted-foreground">{name}</span>
+            <div className="h-48 w-full bg-muted flex flex-col items-center justify-center p-4 text-center">
+              <Award className="h-8 w-8 text-muted-foreground mb-2" />
+              <span className="text-sm font-semibold text-muted-foreground">{name}</span>
             </div>
           )}
+          <div className="p-3.5 border-t border-border/60 bg-card/60 flex-1 flex flex-col justify-center">
+            <h4 className="font-semibold text-xs sm:text-sm text-foreground group-hover:text-nama-purple dark:group-hover:text-nama-gold transition-colors line-clamp-1">
+              {name}
+            </h4>
+            {issuedBy && (
+              <p className="text-[11px] text-muted-foreground truncate mt-0.5">
+                {issuedBy}
+              </p>
+            )}
+          </div>
         </CardContent>
       </Card>
 

@@ -12,6 +12,7 @@ import { getBlogs, type Blog as BlogType } from '@/backend/blogs';
 import { Link } from 'react-router-dom';
 import SEO from '@/components/SEO';
 import { smartIncludes, suggestCorrection } from '@/lib/smartSearch';
+import { stripHtml } from '@/lib/utils';
 
 
 const Blog = () => {
@@ -43,9 +44,11 @@ const Blog = () => {
   const filteredPosts = useMemo(() => {
     if (!blogPosts) return [];
     return blogPosts.filter(post => {
+      const plainContentEn = stripHtml(post.contentEn);
+      const plainContentAr = stripHtml(post.contentAr);
       const matchesSearch = !searchTerm.trim() ||
         smartIncludes(
-          `${post.titleEn} ${post.titleAr} ${post.keywords || ''} ${post.contentEn || ''} ${post.contentAr || ''}`,
+          `${post.titleEn} ${post.titleAr} ${post.keywords || ''} ${plainContentEn} ${plainContentAr}`,
           searchTerm
         );
 
@@ -202,7 +205,7 @@ const Blog = () => {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <p className="text-muted-foreground line-clamp-3">
-                      {isRTL ? post.contentAr : post.contentEn}
+                      {stripHtml(isRTL ? post.contentAr : post.contentEn)}
                     </p>
                     {post.keywords && (
                       <div className="flex flex-wrap gap-1">

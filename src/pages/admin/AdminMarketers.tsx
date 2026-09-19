@@ -142,18 +142,42 @@ export default function AdminMarketers() {
     if (selectedIds.size === 0) return;
     if (!confirm(t(`Delete ${selectedIds.size} applications?`, `حذف ${selectedIds.size} طلبات؟`))) return;
 
+    const idsToDelete = Array.from(selectedIds);
     try {
-      const { error } = await supabase
+      // 1. Delete any related replies to keep database clean
+      try {
+        await supabase
+          .from('submission_replies')
+          .delete()
+          .in('submission_id', idsToDelete);
+      } catch {
+        // Continue even if replies table doesn't have matches
+      }
+
+      // 2. Delete applications
+      const { data, error, count } = await supabase
         .from('marketer_applications')
-        .delete()
-        .in('id', Array.from(selectedIds));
+        .delete({ count: 'exact' })
+        .in('id', idsToDelete)
+        .select();
 
       if (error) throw error;
-      toast.success(t(`${selectedIds.size} applications deleted`, `تم حذف ${selectedIds.size} طلبات`));
+
+      if (data && data.length === 0 && count === 0) {
+        throw new Error(
+          t(
+            'Deletion was blocked by database permissions (RLS). Please ensure admin delete policy is applied.',
+            'تم رفض الحذف بواسطة صلاحيات قاعدة البيانات (RLS). يرجى التأكد من تطبيق سياسة الحذف للمشرف.'
+          )
+        );
+      }
+
+      toast.success(t(`${idsToDelete.length} applications deleted`, `تم حذف ${idsToDelete.length} طلبات`));
+      setApplications(prev => prev.filter(app => !selectedIds.has(app.id)));
       setSelectedIds(new Set());
       fetchApplications();
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || t('Failed to delete applications', 'فشل حذف الطلبات'));
     }
   };
 
@@ -173,19 +197,53 @@ export default function AdminMarketers() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t('Are you sure?', 'هل أنت متأكد؟'))) return;
+    const targetApp = applications.find(a => a.id === id);
+    const confirmMessage = targetApp
+      ? t(`Delete application from "${targetApp.name}"?`, `حذف طلب "${targetApp.name}"؟`)
+      : t('Are you sure you want to delete this application?', 'هل أنت متأكد من حذف هذا الطلب؟');
+
+    if (!confirm(confirmMessage)) return;
 
     try {
-      const { error } = await supabase
+      // 1. Clean up any related submission replies
+      try {
+        await supabase
+          .from('submission_replies')
+          .delete()
+          .eq('submission_id', id);
+      } catch {
+        // Continue even if replies table has no matches
+      }
+
+      // 2. Delete marketer application
+      const { data, error, count } = await supabase
         .from('marketer_applications')
-        .delete()
-        .eq('id', id);
+        .delete({ count: 'exact' })
+        .eq('id', id)
+        .select();
 
       if (error) throw error;
+
+      if (data && data.length === 0 && count === 0) {
+        throw new Error(
+          t(
+            'Deletion was blocked by database permissions (RLS). Please ensure admin delete policy is applied.',
+            'تم رفض الحذف بواسطة صلاحيات قاعدة البيانات (RLS). يرجى التأكد من تطبيق سياسة الحذف للمشرف.'
+          )
+        );
+      }
+
       toast.success(t('Deleted successfully', 'تم الحذف بنجاح'));
+      // Optimistic update so UI reflects deletion immediately
+      setApplications(prev => prev.filter(app => app.id !== id));
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
       fetchApplications();
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || t('Failed to delete application', 'فشل حذف الطلب'));
     }
   };
 
