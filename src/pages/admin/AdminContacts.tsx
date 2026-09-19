@@ -162,6 +162,8 @@ export default function AdminContacts() {
       </div>
 
       <SubmissionDetailDialog
+        submissionType="contact_submission"
+        submissionId={detail?.id}
         open={!!detail}
         onOpenChange={(o) => !o && setDetail(null)}
         title={t('Contact Inquiry', 'رسالة تواصل')}
