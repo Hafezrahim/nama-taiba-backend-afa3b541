@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 import { HelmetProvider } from 'react-helmet-async';
 import Index from "./pages/Index";
+import PageViewTracker from '@/components/PageViewTracker';
 import DynamicSEO from './components/DynamicSEO';
 import {
   QueryClient,
@@ -116,6 +117,7 @@ function App() {
                   <PWAProvider>
                   <Suspense fallback={<PageLoader />}>
                     <DynamicSEO />
+                    <PageViewTracker />
                     <Routes>
                       <Route path="/" element={<Index />} />
                       <Route path="/products" element={<Products />} />
