@@ -124,6 +124,27 @@ const AdminDashboard = () => {
     }
   });
 
+  // Fetch page visits across the public site (About, Team, Services, Contact, etc.)
+  const { data: pageTraffic, isLoading: isLoadingPageTraffic } = useQuery({
+    queryKey: ['page-traffic'],
+    queryFn: async () => {
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+      const [totalRes, weekRes, pathsRes] = await Promise.all([
+        supabase.from('page_views').select('*', { count: 'exact', head: true }),
+        supabase.from('page_views').select('*', { count: 'exact', head: true }).gte('created_at', weekAgo),
+        supabase.from('page_views').select('path').limit(1000),
+      ]);
+
+      const uniquePages = new Set((pathsRes.data || []).map((r: any) => r.path)).size;
+
+      return {
+        total: totalRes.count || 0,
+        lastWeek: weekRes.count || 0,
+        uniquePages,
+      };
+    }
+  });
+
 
 
 
@@ -294,6 +315,17 @@ const AdminDashboard = () => {
       icon: Briefcase,
       gradient: 'from-rose-500 to-pink-600',
       bgGradient: 'from-rose-500/10 to-pink-600/5'
+    },
+    {
+      title: t('Page Visits', 'زيارات الصفحات'),
+      value: isLoadingPageTraffic ? null : (pageTraffic?.total || 0).toLocaleString(),
+      change: null,
+      subtitle: isLoadingPageTraffic
+        ? null
+        : `${pageTraffic?.lastWeek || 0} ${t('this week', 'هذا الأسبوع')} · ${pageTraffic?.uniquePages || 0} ${t('pages', 'صفحة')}`,
+      icon: TrendingUp,
+      gradient: 'from-indigo-500 to-blue-600',
+      bgGradient: 'from-indigo-500/10 to-blue-600/5'
     },
     {
       title: t('Blog Traffic', 'مشاهدات المدونة'),
