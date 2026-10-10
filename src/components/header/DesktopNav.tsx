@@ -17,6 +17,7 @@ const DesktopNav = () => {
       <Link to="/" className={linkClass}>{t('Home', 'الرئيسية')}</Link>
       <Link to="/products" className={linkClass}>{t('Products', 'المنتجات')}</Link>
       <Link to="/about" className={linkClass}>{t('About Us', 'من نحن')}</Link>
+      <Link to="/team" className={linkClass}>{t('Our Team', 'فريقنا')}</Link>
       <Link to="/quality" className={linkClass}>{t('Quality', 'الجودة')}</Link>
       <Link to="/partners" className={linkClass}>{t('Success Partners', 'شركاء النجاح')}</Link>
       <Link to="/blog" className={linkClass}>{t('Articles', 'المقالات')}</Link>
