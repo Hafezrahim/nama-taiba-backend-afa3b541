@@ -136,8 +136,8 @@ const ProductsSection = () => {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="absolute left-1 lg:left-3 top-1/2 -translate-y-1/2 bg-white/95 shadow-md z-10" />
-          <CarouselNext className="absolute right-1 lg:right-3 top-1/2 -translate-y-1/2 bg-white/95 shadow-md z-10" />
+          <CarouselPrevious className="absolute left-auto top-[-2.5rem] translate-y-0 right-12 bg-white/95 shadow-md z-10" />
+          <CarouselNext className="absolute left-auto top-[-2.5rem] translate-y-0 right-0 bg-white/95 shadow-md z-10" />
         </Carousel>
       ) : null}
       
