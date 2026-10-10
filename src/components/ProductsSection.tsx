@@ -10,7 +10,6 @@ import { ShoppingCart, Heart } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 
@@ -18,7 +17,7 @@ const ProductsSection = () => {
   const { t, language, isRTL } = useLanguage();
   const { addToCart, cartItems } = useCart();
   const { addToWishlist, isInWishlist } = useWishlist();
-  const isMobile = useIsMobile();
+
   
   const { data: products, isLoading, error } = useQuery({
     queryKey: ['products'],
