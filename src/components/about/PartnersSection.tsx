@@ -16,10 +16,13 @@ const PartnersSection = ({
       <h2 className="text-3xl font-bold text-center text-nama-purple mb-8">
         {t('Our Partners', 'شركاؤنا')}
       </h2>
-      <Carousel opts={{
-      align: "start",
-      loop: true
-    }} className="w-full">
+      <Carousel
+      plugins={[Autoplay({ delay: 3000, stopOnInteraction: false, stopOnMouseEnter: true })]}
+      opts={{
+        align: "start",
+        loop: true
+      }} className="w-full">
+
         <CarouselContent>
           {partners.map((partner, index) => <CarouselItem key={index} className="basis-1/2 md:basis-1/3 lg:basis-1/5">
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
