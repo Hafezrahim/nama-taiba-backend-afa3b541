@@ -34,8 +34,8 @@ const PartnersSection = ({
               </Card>
             </CarouselItem>)}
         </CarouselContent>
-        <CarouselPrevious className="mx-[35px]" />
-        <CarouselNext />
+        <CarouselPrevious className="absolute -left-2 lg:-left-4 top-1/2 -translate-y-1/2 bg-white/90 shadow-md" />
+        <CarouselNext className="absolute -right-2 lg:-right-4 top-1/2 -translate-y-1/2 bg-white/90 shadow-md" />
       </Carousel>
     </section>;
 };
