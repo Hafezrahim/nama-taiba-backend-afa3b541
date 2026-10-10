@@ -11,7 +11,8 @@ import { Badge } from './ui/badge';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Carousel, CarouselContent, CarouselItem } from './ui/carousel';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 
 const ProductsSection = () => {
   const { t, language, isRTL } = useLanguage();
@@ -124,23 +125,21 @@ const ProductsSection = () => {
           <p className="text-red-500">{t('Error loading products', 'خطأ في تحميل المنتجات')}</p>
         </div>
       ) : featuredProducts && featuredProducts.length > 0 ? (
-        isMobile ? (
-          <Carousel opts={{ align: "start", direction: language === 'ar' ? 'rtl' : 'ltr' }} className="w-full">
-            <CarouselContent className="-ml-2">
-              {featuredProducts.map((product) => (
-                <CarouselItem key={product.id} className="pl-2 basis-1/2">
-                  <ProductCardComponent product={product} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-        ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <Carousel
+          plugins={[Autoplay({ delay: 4000, stopOnInteraction: false, stopOnMouseEnter: true })]}
+          opts={{ align: "start", loop: true, direction: language === 'ar' ? 'rtl' : 'ltr' }}
+          className="w-full"
+        >
+          <CarouselContent>
             {featuredProducts.map((product) => (
-              <ProductCardComponent key={product.id} product={product} />
+              <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
+                <ProductCardComponent product={product} />
+              </CarouselItem>
             ))}
-          </div>
-        )
+          </CarouselContent>
+          <CarouselPrevious className="absolute -left-2 lg:-left-4 top-1/2 -translate-y-1/2 bg-white/90 shadow-md" />
+          <CarouselNext className="absolute -right-2 lg:-right-4 top-1/2 -translate-y-1/2 bg-white/90 shadow-md" />
+        </Carousel>
       ) : null}
       
       <div className="text-center mt-10">
