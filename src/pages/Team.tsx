@@ -12,7 +12,7 @@ const Team = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <SEO title={t('Our Team', 'فريقنا')} description={t('Meet the Nama Taiba team', 'تعرّف على فريق نماء طيبة')} />
+      <SEO titleEn="Our Team | Nama Taiba" titleAr="فريقنا | نما طيبة" descriptionEn="Meet the Nama Taiba team" descriptionAr="تعرّف على فريق نما طيبة" url="/team" />
       <Header />
       <main className="flex-1 container mx-auto px-4 py-10">
         {isLoading ? (
