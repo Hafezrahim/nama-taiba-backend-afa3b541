@@ -50,7 +50,7 @@ export const getProducts = async (): Promise<Product[]> => {
       isFeatured: row.is_featured || false,
       inStock: row.in_stock || false,
       keywords: row.keywords || '',
-      slug: generateSlug(row.name_en),
+      slug: generateSlug(`${row.name_en} ${row.size || ''}`),
       moq: row.moq || 1
     }));
   } catch (error) {
@@ -83,7 +83,7 @@ export const getProductById = async (id: string): Promise<Product | null> => {
       isFeatured: data.is_featured || false,
       inStock: data.in_stock || false,
       keywords: data.keywords || '',
-      slug: generateSlug(data.name_en),
+      slug: generateSlug(`${data.name_en} ${data.size || ''}`),
       moq: data.moq || 1
     };
   } catch (error) {
@@ -118,7 +118,7 @@ export const getFeaturedProducts = async (): Promise<Product[]> => {
       isFeatured: row.is_featured || false,
       inStock: row.in_stock || false,
       keywords: row.keywords || '',
-      slug: generateSlug(row.name_en),
+      slug: generateSlug(`${row.name_en} ${row.size || ''}`),
       moq: row.moq || 1
     }));
   } catch (error) {
