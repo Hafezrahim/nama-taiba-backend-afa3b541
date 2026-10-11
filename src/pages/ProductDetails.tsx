@@ -29,6 +29,7 @@ const ProductDetails = () => {
   const product = products?.find(p => {
     if (p.id === productSlug) return true;
     if (p.slug === productSlug) return true;
+    if (p.nameEn.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-') === productSlug) return true;
     return false;
   });
 
