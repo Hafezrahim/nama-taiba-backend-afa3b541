@@ -205,7 +205,7 @@ const Blog = () => {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <p className="text-muted-foreground line-clamp-3">
-                      {stripHtml(isRTL ? post.contentAr : post.contentEn)}
+                      {stripHtml((isRTL ? post.contentAr : post.contentEn) || post.contentAr || post.contentEn)}
                     </p>
                     {post.keywords && (
                       <div className="flex flex-wrap gap-1">

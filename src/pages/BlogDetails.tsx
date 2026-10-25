@@ -283,7 +283,7 @@ const BlogDetails = () => {
 
                 {/* Article Body */}
                 {(() => {
-                  const content = language === 'en' ? currentPost.contentEn : currentPost.contentAr;
+                  const content = (language === 'en' ? currentPost.contentEn : currentPost.contentAr) || currentPost.contentAr || currentPost.contentEn;
                   const hasHtml = /<[a-z][\s\S]*>/i.test(content || '');
                   return (
                     <div
@@ -338,7 +338,7 @@ const BlogDetails = () => {
                         </CardHeader>
                         <CardContent>
                           <p className="text-sm text-muted-foreground line-clamp-2">
-                            {stripHtml(isRTL ? post.contentAr : post.contentEn)}
+                            {stripHtml((isRTL ? post.contentAr : post.contentEn) || post.contentAr || post.contentEn)}
                           </p>
                         </CardContent>
                       </Card>
