@@ -176,7 +176,7 @@ const Blog = () => {
                     <AspectRatio ratio={16 / 9}>
                       <img
                         src={post.image || "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=1000&auto=format&fit=crop"}
-                        alt={isRTL ? post.titleAr : post.titleEn}
+                        alt={(isRTL ? post.titleAr : post.titleEn) || post.titleEn || post.titleAr}
                         className="object-cover w-full h-full"
                         loading="lazy"
                       />
@@ -187,7 +187,7 @@ const Blog = () => {
                   </div>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-xl text-nama-purple">
-                      {isRTL ? post.titleAr : post.titleEn}
+                      {(isRTL ? post.titleAr : post.titleEn) || post.titleEn || post.titleAr}
                     </CardTitle>
                     <div className="flex items-center gap-3 text-sm text-muted-foreground">
                       <span>{post.date}</span>
