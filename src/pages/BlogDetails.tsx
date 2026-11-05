@@ -264,8 +264,8 @@ const BlogDetails = () => {
                 dir={isRTL ? 'rtl' : 'ltr'}
               >
                 {/* Title */}
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight leading-snug">
-                  {language === 'en' ? currentPost.titleEn : currentPost.titleAr}
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground tracking-tight leading-snug" dir={language === 'en' ? (currentPost.titleEn ? 'ltr' : 'rtl') : (currentPost.titleAr ? 'rtl' : 'ltr')}>
+                  {language === 'en' ? (currentPost.titleEn || currentPost.titleAr) : (currentPost.titleAr || currentPost.titleEn)}
                 </h1>
 
                 {/* Subtitle / quick meta bar */}
@@ -285,10 +285,13 @@ const BlogDetails = () => {
                 {(() => {
                   const content = (language === 'en' ? currentPost.contentEn : currentPost.contentAr) || currentPost.contentAr || currentPost.contentEn;
                   const hasHtml = /<[a-z][\s\S]*>/i.test(content || '');
+                  // Direction follows the text actually shown, not the page language:
+                  // an Arabic article viewed in English mode still renders RTL (and vice versa).
+                  const bodyDir = /[\u0600-\u06FF]/.test(content || '') ? 'rtl' : 'ltr';
                   return (
                     <div
                       className="prose prose-lg max-w-none dark:prose-invert prose-headings:font-bold prose-headings:text-nama-purple dark:prose-headings:text-nama-gold prose-p:text-foreground/90 prose-p:leading-relaxed prose-img:rounded-xl prose-img:shadow-md leading-relaxed break-words"
-                      dir={isRTL ? 'rtl' : 'ltr'}
+                      dir={bodyDir}
                     >
                       {hasHtml ? (
                         <div dangerouslySetInnerHTML={{ __html: content || '' }} />
@@ -325,7 +328,7 @@ const BlogDetails = () => {
                         )}
                         <CardHeader className="pb-2">
                           <CardTitle className="text-base text-primary line-clamp-2">
-                            {isRTL ? post.titleAr : post.titleEn}
+                            {(isRTL ? post.titleAr : post.titleEn) || post.titleEn || post.titleAr}
                           </CardTitle>
                           <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <span>{post.date}</span>
